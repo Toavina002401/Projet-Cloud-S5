@@ -1,0 +1,29 @@
+services:
+  php:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    container_name: container_php
+    ports:
+      - "8080:80"
+    volumes:
+      - ../:/var/www/html
+    environment:
+      APP_ENV: prod
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: container_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Belouh
+      POSTGRES_DB: ProjetCloudS5
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
