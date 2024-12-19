@@ -1,0 +1,132 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Documentation API Projet-Cloud-S5",
+        "description": "Documentation de tous les APIs de notre projet",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/inscription": {
+            "post": {
+                "tags": [
+                    "Utilisateur"
+                ],
+                "summary": "Inscription de l'utilisateur",
+                "operationId": "d3d2dd59f195539f66a5649d47c47727",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Inscription réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "succes"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Utilisateur créé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    }
+                }
+            }
+        },
+        "/api/validate-pin-inscription": {
+            "post": {
+                "tags": [
+                    "Utilisateur"
+                ],
+                "summary": "Valider le code PIN d'inscription",
+                "operationId": "920a7ed84ff9a7a68845bc3925e5da0d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "codePin"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "codePin": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Inscription validée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "succes"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Inscription validée"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides ou code PIN incorrect"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Utilisateur",
+            "description": "Opérations liées au contrôleur pour l'utilisateur"
+        }
+    ]
+}

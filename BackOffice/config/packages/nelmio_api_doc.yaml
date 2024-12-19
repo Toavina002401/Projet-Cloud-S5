@@ -1,0 +1,46 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Documentation API Projet-Cloud-S5
+            description: Documentation de tous les APIs de notre projet
+            version: 1.0.0
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+
+
+# nelmio_api_doc:
+#     documentation:
+#         info:
+#             title: Documentation API Projet-Cloud-S5
+#             description: Documentation de tous les APIs de notre projet
+#             version: 1.0.0
+#         swagger:
+#             info:
+#                 title: ApiRestUtilisateur
+#                 version: 1.0.0
+#             host: localhost:8080
+#             basePath: /api
+#         paths:
+#             '%kernel.project_dir%/src/Controller':
+#                 resource: .
+#                 type: annotation
+#         models:
+#             auto_mapping: true
+#     cache: true
+
+# nelmio_api_doc:
+#     documentation:
+#         info:
+#             title: Documentation API Projet-Cloud-S5
+#             description: Documentation de tous les APIs de notre projet
+#             version: 1.0.0
+#         paths:
+#             '%kernel.project_dir%/src/Controller':
+#                 resource: .
+#                 type: annotation
+#         models:
+#             auto_mapping: true
+#     cache: true
+
+
