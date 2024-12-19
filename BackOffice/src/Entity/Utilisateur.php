@@ -3,12 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
-class Utilisateur
+class Utilisateur implements PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -60,9 +59,10 @@ class Utilisateur
         return $this;
     }
 
-    public function getMdp(): ?string
+    // Méthode requise par PasswordAuthenticatedUserInterface
+    public function getPassword(): ?string
     {
-        return $this->mdp;
+        return $this->mdp; // Retourne 'mdp'
     }
 
     public function setMdp(string $mdp): static
@@ -92,7 +92,6 @@ class Utilisateur
     public function setActif(bool $actif): static
     {
         $this->actif = $actif;
-
         return $this;
     }
 }
