@@ -155,9 +155,9 @@ class UtilisateurController extends AbstractController
 
 
 
-        /**
+    /**
      * @OA\Post(
-     *     path="/api/login",
+     *     path="/api/connexion",
      *     summary="Connexion utilisateur",
      *     tags={"Utilisateur"},
      *     @OA\RequestBody(
@@ -195,11 +195,10 @@ class UtilisateurController extends AbstractController
      *     )
      * )
      */
-    #[Route('/api/login', name: 'login', methods: ['POST'])]
-    public function login(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, UtilisateurRepository $utilisateurRepository): JsonResponse 
+    #[Route('/api/connexion', name: 'connexion', methods: ['POST'])]
+    public function connexion(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, UtilisateurRepository $utilisateurRepository): JsonResponse 
     {
         $data = json_decode($request->getContent(), true);
-        return $utilisateurRepository->connexion($data, $em, $passwordHasher);
+        return $utilisateurRepository->login($data, $em, $passwordHasher);
     }
-
 }

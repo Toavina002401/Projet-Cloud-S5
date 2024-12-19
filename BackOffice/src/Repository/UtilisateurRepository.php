@@ -48,7 +48,7 @@ class UtilisateurRepository extends ServiceEntityRepository
 //    }
 
     public function inscription($data, $em, $passwordHasher): JsonResponse
-    {
+    {    
         if (!$data || !isset($data['pseudo'], $data['email'], $data['mdp'])) {
             return $this->responseHelper->jsonResponse('erreur', null, 'Données invalides', null);
         }
@@ -86,7 +86,7 @@ class UtilisateurRepository extends ServiceEntityRepository
 
 
     
-    public function connexion($data, $em, $passwordHasher): JsonResponse
+    public function login($data, $em, $passwordHasher): JsonResponse
     {
         if (!$data || !isset($data['email'], $data['mdp'])) {
             return $this->responseHelper->jsonResponse('erreur', null, 'Données invalides', null);
@@ -97,11 +97,11 @@ class UtilisateurRepository extends ServiceEntityRepository
             return $this->responseHelper->jsonResponse('erreur', null, 'Le mot de passe ou l\'email est incorrect. Veuillez réessayer.', null);
         }
 
-        if (!$passwordHasher->isPasswordValid($existingUser->getMdp(), $data['mdp'])) {
+        if (!$passwordHasher->isPasswordValid($existingUser, $data['mdp'])) {
             return $this->responseHelper->jsonResponse('erreur', null, 'Le mot de passe ou l\'email est incorrect. Veuillez réessayer.', null);
         }
 
-        return $this->responseHelper->jsonResponse('succes', ['message' => 'Connexion réussie'], null, null);
+        return $this->responseHelper->jsonResponse('succes', ['message' => 'Connexion réussie'], null, null);    
     }
 
 

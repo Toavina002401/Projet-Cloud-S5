@@ -164,13 +164,13 @@
                 }
             }
         },
-        "/api/login": {
+        "/api/connexion": {
             "post": {
                 "tags": [
                     "Utilisateur"
                 ],
                 "summary": "Connexion utilisateur",
-                "operationId": "c7c2a052ce6bfef935122b55d9ac92ec",
+                "operationId": "4996775c6947987b89ee1b70415924c6",
                 "requestBody": {
                     "required": true,
                     "content": {
