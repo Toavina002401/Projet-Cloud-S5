@@ -34,12 +34,12 @@ CREATE TABLE Activite(
    FOREIGN KEY(id_utilisateur) REFERENCES Utilisateur(id)
 );
 
-CREATE TABLE Permission(
-   id SERIAL,
-   nom VARCHAR(255)  NOT NULL,
-   description VARCHAR(255)  NOT NULL,
-   PRIMARY KEY(id)
-);
+-- CREATE TABLE Permission(
+--    id SERIAL,
+--    nom VARCHAR(255)  NOT NULL,
+--    description VARCHAR(255)  NOT NULL,
+--    PRIMARY KEY(id)
+-- );
 
 CREATE TABLE PIN(
    id SERIAL,
@@ -50,6 +50,16 @@ CREATE TABLE PIN(
    PRIMARY KEY(id),
    FOREIGN KEY(id_utilisateur) REFERENCES Utilisateur(id)
 );
+
+CREATE TABLE TentativesConnexion(
+   id SERIAL,
+   nb_tentatives INTEGER NOT NULL,
+   derniere_tentative TIMESTAMP NOT NULL,
+   id_utilisateur INTEGER NOT NULL,
+   PRIMARY KEY(id),
+   FOREIGN KEY(id_utilisateur) REFERENCES Utilisateur(id)
+);
+
 
 -- CREATE TABLE Utilisateur_role(
 --    id_utilisateur INTEGER,
