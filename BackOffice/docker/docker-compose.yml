@@ -24,6 +24,8 @@ services:
       - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entry-point-initdb.d
 
 volumes:
   db_data:
+    driver: local
