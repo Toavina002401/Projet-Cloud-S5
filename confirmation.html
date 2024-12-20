@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmation de votre compte</title>
+    <title>Réinitialisation de votre mot de passe</title>
     <style>
         body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; background-color: #f4f7fc; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; }
         .email-wrapper { width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }
@@ -20,14 +20,15 @@
 <body>
     <div class="email-wrapper">
         <div class="header">
-            <h1>Confirmation de votre compte</h1>
+            <h1>Réinitialisation de votre mot de passe</h1>
         </div>
         <div class="content">
             <h2>Bonjour,</h2>
-            <p>Bienvenue ! Nous avons reçu une demande pour confirmer votre compte.</p>
-            <p>Pour confirmer votre compte, cliquez sur le bouton ci-dessous :</p>
-            <p><a href="{{confirmationLink}}" class="button">Confirmer mon compte</a></p>
-            <p>Si vous n'avez pas effectué cette demande, veuillez ignorer cet email.</p>
+            <p>Vous avez atteint la limite autorisée de tentatives de connexion échouées.</p>
+            <p>Pour des raisons de sécurité, votre compte a été temporairement verrouillé.</p>
+            <p>Veuillez cliquer sur le bouton ci-dessous pour réinitialiser votre mot de passe :</p>
+            <p><a href="{{resetPasswordLink}}" class="button">Réinitialiser mon mot de passe</a></p>
+            <p>Si vous n'avez pas effectué ces tentatives, veuillez contacter notre support ou ignorer cet email.</p>
         </div>
         <div class="footer">
             <p>Cordialement, <br>L'équipe de votre service</p>

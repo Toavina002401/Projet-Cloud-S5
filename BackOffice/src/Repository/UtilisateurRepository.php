@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Utilisateur;
+use App\Entity\Session;
 use App\Entity\TentativesConnexion;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -220,7 +221,7 @@ class UtilisateurRepository extends ServiceEntityRepository
     }
 
 
-    public function login($data,$entityManager,$max):JsonResponse
+    public function login($data,$entityManager,$max, MailerService $mailerService, int $sessionLifetime):JsonResponse
     {
         $timezone = new \DateTimeZone('Europe/Moscow');
         $maintenant = new \DateTimeImmutable('now', $timezone);
@@ -279,13 +280,29 @@ class UtilisateurRepository extends ServiceEntityRepository
             $entityManager->flush();
 
             if ($tentative->getNbTentatives() >= $max) {
-                //envoyer mail
+                try {
+                    $mailerService->sendEmailReinitialisation($email,'Réinitialisation du mot de passe');
+                    return $this->responseHelper->jsonResponse('succes', ['message' => 'Réinitialisation du mot de passe envoyé à '. $email], null, null);
+                } catch (\Exception $e) {
+                    return $this->responseHelper->jsonResponse('erreur', null, 'Erreur lors de l\'envoi de l\'email : ' . $e->getMessage(), null);
+                }
             }
 
             return $this->responseHelper->jsonResponse('erreur', null, 'Mot de passe incorrect , il vous reste '. ($max - $tentative->getNbTentatives()) .' tentatives a faire', null);
         }
 
         $tentative->setNbTentatives(0);
+        // Générer un token de session
+        $token = bin2hex(random_bytes(32));
+        $dateExpiration = $maintenant->modify("+{$sessionLifetime} seconds");
+
+        $session = new Session();
+        $session->setToken($token)
+                ->setUtilisateur($utilisateur)
+                ->setDateCreation($maintenant)
+                ->setDateExpiration($dateExpiration);
+
+        $entityManager->persist($session);
         $entityManager->flush();
 
         $data = [
@@ -295,7 +312,47 @@ class UtilisateurRepository extends ServiceEntityRepository
                 'pseudo' => $utilisateur->getPseudo(),
                 'email' => $utilisateur->getEmail(),
             ],
+            'session' => [
+                'token' => $token,
+                'expires_at' => $dateExpiration->format('Y-m-d H:i:s'),
+            ],
         ];
+
         return $this->responseHelper->jsonResponse('succes', ['data' => $data], null, null);
     }
+
+
+    public function resetTentatives($data, $entityManager): JsonResponse
+    {
+        $email = $data['email'] ?? null;
+
+        if (!$email) {
+            return $this->responseHelper->jsonResponse('erreur', null, 'Email requis', null);
+        }
+
+        $utilisateurRepo = $entityManager->getRepository(Utilisateur::class);
+        $utilisateur = $utilisateurRepo->findOneBy(['email' => $email]);
+
+        if (!$utilisateur) {
+            return $this->responseHelper->jsonResponse('erreur', null, 'Utilisateur introuvable', null);
+        }
+
+        $tentativesRepo = $entityManager->getRepository(TentativesConnexion::class);
+        $tentative = $tentativesRepo->findOneBy(['utilisateur' => $utilisateur]);
+
+        if (!$tentative) {
+            return $this->responseHelper->jsonResponse('erreur', null, 'Aucune tentative trouvée pour cet utilisateur', null);
+        }
+
+        $tentative->setNbTentatives(0);
+        $entityManager->flush();
+
+        return $this->responseHelper->jsonResponse(
+            'succes',
+            ['message' => 'Le nombre de tentatives a été réinitialisé pour l\'email ' . $email],
+            null,
+            null
+        );
+    }
+
 }

@@ -31,6 +31,7 @@ class UtilisateurController extends AbstractController
     private ResponseHelper $responseHelper;
     private MailerService $mailerService;
     private const MAX_TENTATIVES = 3; 
+    private const MAX_SESSION = 300; 
 
     public function __construct(ResponseHelper $responseHelper,MailerService $mailerService)
     {
@@ -383,12 +384,22 @@ class UtilisateurController extends AbstractController
      * )
      */
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
-    public function login(Request $request,EntityManagerInterface $entityManager,UtilisateurRepository $utilisateurRepository): JsonResponse 
+    public function login(Request $request,EntityManagerInterface $entityManager,UtilisateurRepository $utilisateurRepository, MailerService $mailerService): JsonResponse 
     {
         $data = json_decode($request->getContent(), true);
         $maximum =self::MAX_TENTATIVES;
-        return $utilisateurRepository->login($data,$entityManager,$maximum);
+        $session = self::MAX_SESSION;
+        return $utilisateurRepository->login($data,$entityManager,$maximum,$mailerService,$session);
     }
+
+    #[Route('/api/reinitialise', name: 'api_reinitialiser', methods: ['POST'])]
+    public function resetTentative(Request $request,EntityManagerInterface $entityManager,UtilisateurRepository $utilisateurRepository): JsonResponse 
+    {
+        $data = json_decode($request->getContent(), true);
+        return $utilisateurRepository->resetTentatives($data,$entityManager);
+    }
+
+
 
 
 }
