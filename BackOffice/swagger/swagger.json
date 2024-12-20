@@ -27,9 +27,13 @@
                                         "type": "string",
                                         "example": "user@example.com"
                                     },
-                                    "password": {
+                                    "mdp": {
                                         "type": "string",
                                         "example": "password123"
+                                    },
+                                    "pseudo": {
+                                        "type": "string",
+                                        "example": "user"
                                     }
                                 },
                                 "type": "object"
@@ -39,7 +43,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Inscription réussie",
+                        "description": "Code pin envoyer avec succes",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -48,9 +52,28 @@
                                             "type": "string",
                                             "example": "succes"
                                         },
-                                        "message": {
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Code PIN envoyé à user@example.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "null"
+                                            },
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "error": {
                                             "type": "string",
-                                            "example": "Utilisateur créé"
+                                            "example": null,
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -97,7 +120,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Inscription validée",
+                        "description": "Inscription réussie avec succes",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -106,9 +129,28 @@
                                             "type": "string",
                                             "example": "succes"
                                         },
-                                        "message": {
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Inscription validée"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "null"
+                                            },
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "error": {
                                             "type": "string",
-                                            "example": "Inscription validée"
+                                            "example": null,
+                                            "nullable": true
                                         }
                                     },
                                     "type": "object"
@@ -117,7 +159,375 @@
                         }
                     },
                     "400": {
-                        "description": "Données invalides ou code PIN incorrect"
+                        "description": "Données invalides"
+                    }
+                }
+            }
+        },
+        "/api/utilisateur/{id}": {
+            "get": {
+                "tags": [
+                    "Utilisateur"
+                ],
+                "summary": "Selection par id utilisateur",
+                "operationId": "feb6365bb3ffbcf659e834bce123c850",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "L'id de l'utilisateur à sélectionner",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Get id réussie avec succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "succes"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "pseudo": {
+                                                            "type": "string",
+                                                            "example": "user"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "user@example.com"
+                                                        },
+                                                        "date_creation": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2024-12-20 02:07:07"
+                                                        },
+                                                        "actif": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "null"
+                                            },
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Utilisateur"
+                ],
+                "summary": "Modification information utilisateurr",
+                "operationId": "468c9f8fafe94fc3069c1eecd07184cc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "L'id de l'utilisateur à modifier",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Utilisateur modifié avec succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "succes"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Utilisateur modifié"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "null"
+                                            },
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Utilisateur"
+                ],
+                "summary": "Suppression utilisateur",
+                "operationId": "28aa04183e96633447ee8ce4c762a78f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "L'id de l'utilisateur à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Utilisateur supprimer avec succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "succes"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Utilisateur supprimer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "null"
+                                            },
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    }
+                }
+            }
+        },
+        "/api/utilisateurs": {
+            "get": {
+                "tags": [
+                    "Utilisateur"
+                ],
+                "summary": "Selection de tous les utilisateurs",
+                "operationId": "4ab8810a2f59d33118463c81db3b406a",
+                "responses": {
+                    "200": {
+                        "description": "Get All réussie avec succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "succes"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "pseudo": {
+                                                                "type": "string",
+                                                                "example": "user"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "user@example.com"
+                                                            },
+                                                            "date_creation": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2024-12-20 02:07:07"
+                                                            },
+                                                            "actif": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "null"
+                                            },
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Utilisateur"
+                ],
+                "summary": "Connexion utilisateur",
+                "operationId": "c7c2a052ce6bfef935122b55d9ac92ec",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "mdp": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie avec succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "succes"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Mila mbola amboarina"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "null"
+                                            },
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
                     }
                 }
             }

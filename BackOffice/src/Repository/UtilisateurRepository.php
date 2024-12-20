@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Utilisateur;
+use App\Entity\TentativesConnexion;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Service\ResponseHelper;
@@ -215,6 +216,86 @@ class UtilisateurRepository extends ServiceEntityRepository
                 'actif' => $utilisateur->isActif(),
             ];
         }
+        return $this->responseHelper->jsonResponse('succes', ['data' => $data], null, null);
+    }
+
+
+    public function login($data,$entityManager,$max):JsonResponse
+    {
+        $timezone = new \DateTimeZone('Europe/Moscow');
+        $maintenant = new \DateTimeImmutable('now', $timezone);
+        $email = $data['email'] ?? null;
+        $password = $data['mdp'] ?? null;
+
+        if (!$email || !$password) {
+            return $this->responseHelper->jsonResponse('erreur', null, 'Email et mot de passe requis', null);
+        }
+
+        $utilisateurRepo = $entityManager->getRepository(Utilisateur::class);
+        $utilisateur = $utilisateurRepo->findOneBy(['email' => $email]);
+
+        if (!$utilisateur) {
+            return $this->responseHelper->jsonResponse('erreur', null, 'Utilisateur introuvable', null);
+        }
+
+        if (!$utilisateur->isActif()) {
+            return $this->responseHelper->jsonResponse('erreur', null, 'Votre compte est désactivé. Veuillez contacter l\'administrateur.', null);
+        }
+
+        $tentativesRepo = $entityManager->getRepository(TentativesConnexion::class);
+        $tentative = $tentativesRepo->findOneBy(['utilisateur' => $utilisateur]);
+
+        if (!$tentative) {
+            $tentative = new TentativesConnexion();
+            $tentative->setUtilisateur($utilisateur)
+                      ->setNbTentatives(0)
+                      ->setDerniereTentative($maintenant);
+            $entityManager->persist($tentative);
+        }
+
+        // Vérifier si l'utilisateur est bloqué
+        if ($tentative->getNbTentatives() >= $max) {
+            $tentativeDernier = $tentative->getDerniereTentative();
+            if ($tentativeDernier->getTimezone()->getName() !== $timezone->getName()) {
+                $tentativeDernier = \DateTimeImmutable::createFromFormat(
+                    'Y-m-d H:i:s.u',
+                    $tentativeDernier->format('Y-m-d H:i:s.u'),
+                    $timezone
+                );
+            }
+            $diff = ($maintenant)->getTimestamp() - $tentativeDernier->getTimestamp();
+
+            // Exemple : Bloquer pendant 15 minutes (900 secondes)
+            if ($diff < 900) {
+                return $this->responseHelper->jsonResponse('erreur', null, 'Compte temporairement bloqué. Réessayez plus tard.', null);
+            }
+
+            $tentative->setNbTentatives(0);
+        }
+
+        if (!password_verify($password, $utilisateur->getPassword())) {
+            $tentative->setNbTentatives($tentative->getNbTentatives() + 1)
+                      ->setDerniereTentative($maintenant);
+            $entityManager->flush();
+
+            if ($tentative->getNbTentatives() >= $max) {
+                //envoyer mail
+            }
+
+            return $this->responseHelper->jsonResponse('erreur', null, 'Mot de passe incorrect , il vous reste '. ($max - $tentative->getNbTentatives()) .' tentatives a faire', null);
+        }
+
+        $tentative->setNbTentatives(0);
+        $entityManager->flush();
+
+        $data = [
+            'message' => 'Connexion réussie',
+            'utilisateur' => [
+                'id' => $utilisateur->getId(),
+                'pseudo' => $utilisateur->getPseudo(),
+                'email' => $utilisateur->getEmail(),
+            ],
+        ];
         return $this->responseHelper->jsonResponse('succes', ['data' => $data], null, null);
     }
 }
