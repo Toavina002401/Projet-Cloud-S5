@@ -44,7 +44,7 @@ DATABASE_URL="pgsql://postgres:Belouh@db:5432/ProjetCloudS5"
 Run the following command to create the database:
 
 ```bash
-php bin/console doctrine:database:create
+php bin/console doctrine:database:create 
 ```
 
 #### Create the Database Schema
