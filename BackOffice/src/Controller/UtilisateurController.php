@@ -392,6 +392,46 @@ class UtilisateurController extends AbstractController
         return $utilisateurRepository->login($data,$entityManager,$maximum,$mailerService,$session);
     }
 
+
+    /**
+     * @OA\Post(
+     *     path="/api/reinitialise",
+     *     summary="Simulation d'un button de reinitialisation dans l'email",
+     *     tags={"Utilisateur"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *             @OA\Property(property="email", type="string", example="user@example.com")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Le nombre de tentatives a été réinitialisé avec succes",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="succes"),
+     *             @OA\Property(property="data", type="object", 
+     *                 @OA\Property(property="message", type="string", example="Le nombre de tentatives a été réinitialisé pour l'email user@example.com")
+     *             ),
+     *             @OA\Property(
+     *                 property="meta", 
+     *                 type="array",
+     *                 example=null,
+     *                 nullable=true,
+     *                 @OA\Items(  
+     *                     type="string",
+     *                     example="null"
+     *                 )
+     *             ),
+     *             @OA\Property(property="error", type="string", nullable=true, example=null)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Données invalides"
+     *     )
+     * )
+     */
     #[Route('/api/reinitialise', name: 'api_reinitialiser', methods: ['POST'])]
     public function resetTentative(Request $request,EntityManagerInterface $entityManager,UtilisateurRepository $utilisateurRepository): JsonResponse 
     {

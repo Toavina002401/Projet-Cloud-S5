@@ -531,6 +531,78 @@
                     }
                 }
             }
+        },
+        "/api/reinitialise": {
+            "post": {
+                "tags": [
+                    "Utilisateur"
+                ],
+                "summary": "Simulation d'un button de reinitialisation dans l'email",
+                "operationId": "1439c88663f2d7b102fbab8abc90c862",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Le nombre de tentatives a été réinitialisé avec succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "succes"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Le nombre de tentatives a été réinitialisé pour l'email user@example.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "null"
+                                            },
+                                            "example": null,
+                                            "nullable": true
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    }
+                }
+            }
         }
     },
     "tags": [
