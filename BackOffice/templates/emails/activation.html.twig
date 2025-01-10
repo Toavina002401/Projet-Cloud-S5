@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activation de votre compte</title>
+        <style>
+        body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; background-color: #f4f7fc; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .email-wrapper { width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; }
+        .header { background-color: #007bff; padding: 20px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { padding: 20px; text-align: center; }
+        .content h2 { font-size: 20px; color: #333; }
+        .content p { font-size: 16px; line-height: 1.5; color: #555; }
+        .code-box-container { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        .code-box { width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; background-color: #f1f1f1; border: 1px solid #ccc; border-radius: 6px; font-size: 18px; font-weight: bold; color: #333; text-align:center;}
+        .footer { text-align: center; padding: 10px 20px; background-color: #f4f7fc; color: #777; font-size: 14px; }
+    </style>
+    
+</head>
+<body>
+    <div class="email-wrapper">
+        <div class="header">
+            <h1>Activation de votre compte</h1>
+        </div>
+        <div class="content">
+            <h2>Bonjour,</h2>
+            <p>Pour activer votre compte, veuillez utiliser le code PIN suivant :</p>
+            <div class="code-box-container">
+                {% for digit in pinCode %}
+                    <div class="code-box">{{ digit }}</div>
+                {% endfor %}
+            </div>
+            <p>Ce code est valable pendant {{ duration }}. Si vous n'avez pas demandé cette activation, veuillez ignorer cet email.</p>
+        </div>
+        <div class="footer">
+            <p>Cordialement, <br>L'équipe de votre service</p>
+        </div>
+    </div>
+</body>
+</html>
