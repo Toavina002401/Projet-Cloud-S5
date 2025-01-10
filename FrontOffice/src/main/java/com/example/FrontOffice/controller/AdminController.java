@@ -23,4 +23,12 @@ public class AdminController {
     public String inscription(Model model) {
         return "inscription";
     }
+
+    @GetMapping("/verification")
+    public String verification(Model model) {
+        return "verification";
+    }
+
+
+    
 }

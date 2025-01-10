@@ -38,7 +38,7 @@
                 <p class="text-center small">Entrez votre email et votre mot de passe pour créer un compte</p>
               </div>
 
-              <form class="row g-3 needs-validation" id="adminForm" >
+              <form class="row g-3 needs-validation" id="adminForm" method="post" th:action="@{/api/inscription}">
                 <div class="col-12">
                   <label for="email" class="form-label">Adresse email</label>
                   <div class="input-group has-validation">

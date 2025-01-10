@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Login Cryptomonnaie</title>
+    <title>Verification Cryptomonnaie</title>
     <link href="assets/img/logo.png" rel="icon">
     <link href="assets/img/logo.png" rel="apple-touch-icon">
     <link href="assets/vendor/aos/aos.css" rel="stylesheet">
@@ -29,31 +29,23 @@
           <div class="d-flex justify-content-center py-4">
             <a href="#" data-aos="zoom-out" class="logo d-flex align-items-center w-auto">
               <img src="assets/img/logo.png" alt="">
-              <span class="d-none d-lg-block">Connexion</span>
+              <span class="d-none d-lg-block">Verification</span>
             </a> 
           </div>
           <div class="card mb-3" data-aos="zoom-out">
             <div class="card-body">
               <div class="pt-4 pb-2">
-                <h5 class="card-title text-center pb-0 fs-4">Connectez-vous à votre compte</h5>
-                <p class="text-center small">Entrez votre adresse e-mail et votre mot de passe pour vous connecter</p>
+                <h5 class="card-title text-center pb-0 fs-4">Vérification par double authentification</h5>
+                <p class="text-center small">Entrez le code PIN</p>
               </div>
-              <form class="row g-3 needs-validation" id="clientForm" method="post" th:action="@{/api/login}">
+              <form class="row g-3 needs-validation" id="clientForm" method="post" th:action="@{/api/verification}">
                 <div class="col-12">
-                  <label for="email" class="form-label">Adresse e-mail</label>
-                  <div class="input-group has-validation">
-                    <span class="input-group-text" id="inputGroupPrepend">@</span>
-                    <input type="email" name="email" class="form-control" id="email" placeholder="exemple@mail.com">
-                    <div class="invalid-feedback">Veuillez entrer une adresse e-mail valide.</div>
-                  </div>
+                  <label for="pin" class="form-label">Votre Pin</label>
+                  <input type="text" name="pin" class="form-control" id="pin" placeholder="******">
+                  <div class="invalid-feedback">Veuillez entrer le pin corespondant.</div>
                 </div>
                 <div class="col-12">
-                  <label for="password" class="form-label">Mot de passe</label>
-                  <input type="password" name="password" class="form-control" id="password" placeholder="********">
-                  <div class="invalid-feedback">Veuillez entrer votre mot de passe.</div>
-                </div>
-                <div class="col-12">
-                  <button class="btn btn-primary w-100" type="submit">Connexion</button>
+                  <button class="btn btn-primary w-100" type="submit">Verifier</button>
                 </div>
                 <div class="col-12">
                     <p class="small mb-0">Pas encore de compte ? <a th:href="@{/inscription}">Inscrivez-vous ici</a></p>
