@@ -35,5 +35,21 @@ class MailerService
     
         $this->mailer->send($email);
     }
+
+    public function sendEmailReinitialisation($to = 'you@example.com', $subject = 'Réinitialisation du mot de passe'): void
+    {
+        $lien = "votrelien";
+        $content = $this->twig->render('emails/reinitialisation.html.twig', [
+            'lien' => $lien,
+        ]);
+    
+        $email = (new Email())
+            ->from('toavinawukeys@gmail.com')
+            ->to($to)
+            ->subject($subject)
+            ->html($content);
+    
+        $this->mailer->send($email);
+    }
     
 }

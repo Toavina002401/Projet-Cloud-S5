@@ -5,10 +5,7 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libpq-dev \
-    libzip-dev \
-    libxml2-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip \
-    && docker-php-ext-enable opcache
+    && docker-php-ext-install pdo pdo_pgsql
 
 # Installation de Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -35,8 +32,7 @@ RUN composer install --no-dev --optimize-autoloader --classmap-authoritative && 
     php bin/console cache:warmup
 
 # Définir les permissions pour le cache/logs de Symfony
-RUN chown -R www-data:www-data /var/www/html && \
-    chmod -R 775 /var/www/html/var
+RUN chown -R www-data:www-data /var/www/html/var
 
 # Exposer le port 80
 EXPOSE 80
