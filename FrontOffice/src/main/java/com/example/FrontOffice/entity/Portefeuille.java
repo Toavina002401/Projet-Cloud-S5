@@ -11,7 +11,7 @@ public class Portefeuille {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "date_creation")
+    @Column(name = "date_creation", nullable = false, updatable = false)
     private Timestamp dateCreation;
 
     @Column(name = "solde_fonds", precision = 20, scale = 6)
@@ -20,6 +20,11 @@ public class Portefeuille {
     @ManyToOne
     @JoinColumn(name = "id_utilisateur", nullable = false)
     private Utilisateur utilisateur;
+
+    @PrePersist
+    public void prePersist() {
+        this.dateCreation = new Timestamp(System.currentTimeMillis());
+    }
 
     public Long getId() {
         return id;
@@ -53,6 +58,5 @@ public class Portefeuille {
         this.utilisateur = utilisateur;
     }
 
-    public Portefeuille(){}
-
+    public Portefeuille() {}
 }

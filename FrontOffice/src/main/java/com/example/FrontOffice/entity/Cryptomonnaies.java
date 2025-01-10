@@ -3,14 +3,17 @@ package com.example.FrontOffice.entity;
 import jakarta.persistence.*;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = "symbole"))
 public class Cryptomonnaies {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nom;
 
+    @Column(nullable = false, unique = true)
     private String symbole;
 
     public Long getId() {
@@ -37,6 +40,5 @@ public class Cryptomonnaies {
         this.symbole = symbole;
     }
 
-    public Cryptomonnaies(){}
-
+    public Cryptomonnaies() {}
 }
