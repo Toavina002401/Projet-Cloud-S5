@@ -23,7 +23,7 @@
    - Pour accéder à la liste complète des API disponibles :
      1. Lancez le projet.
      2. Accédez à la documentation Swagger via l'URL suivante :
-        [http://127.0.0.1:8000/doc](http://127.0.0.1:8000/doc).
+        [http://127.0.0.1:8080/doc](http://127.0.0.1:8080/doc).
 
 
 
