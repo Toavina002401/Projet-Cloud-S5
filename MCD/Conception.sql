@@ -34,12 +34,12 @@ CREATE TABLE Activite(
    FOREIGN KEY(id_utilisateur) REFERENCES Utilisateur(id)
 );
 
-CREATE TABLE Permission(
-   id SERIAL,
-   nom VARCHAR(255)  NOT NULL,
-   description VARCHAR(255)  NOT NULL,
-   PRIMARY KEY(id)
-);
+-- CREATE TABLE Permission(
+--    id SERIAL,
+--    nom VARCHAR(255)  NOT NULL,
+--    description VARCHAR(255)  NOT NULL,
+--    PRIMARY KEY(id)
+-- );
 
 CREATE TABLE PIN(
    id SERIAL,
@@ -50,6 +50,16 @@ CREATE TABLE PIN(
    PRIMARY KEY(id),
    FOREIGN KEY(id_utilisateur) REFERENCES Utilisateur(id)
 );
+
+CREATE TABLE TentativesConnexion(
+   id SERIAL,
+   nb_tentatives INTEGER NOT NULL,
+   derniere_tentative TIMESTAMP NOT NULL,
+   id_utilisateur INTEGER NOT NULL,
+   PRIMARY KEY(id),
+   FOREIGN KEY(id_utilisateur) REFERENCES Utilisateur(id)
+);
+
 
 -- CREATE TABLE Utilisateur_role(
 --    id_utilisateur INTEGER,
@@ -66,3 +76,46 @@ CREATE TABLE PIN(
 --    FOREIGN KEY(id_role) REFERENCES Roles(id),
 --    FOREIGN KEY(id_permission) REFERENCES Permission(id)
 -- );
+
+
+
+----------------------------------------------------------------- Theme 2 --------------------------------------------------
+
+
+CREATE TABLE Cryptomonnaies(
+   id SERIAL,
+   nom VARCHAR(50)  NOT NULL,
+   symbole VARCHAR(50)  NOT NULL,
+   PRIMARY KEY(id)
+);
+
+CREATE TABLE Portefeuille(
+   id SERIAL,
+   date_creation TIMESTAMP NOT NULL,
+   solde_fonds NUMERIC(20,6)  ,
+   id_utilisateur INTEGER NOT NULL,
+   PRIMARY KEY(id),
+   FOREIGN KEY(id_utilisateur) REFERENCES Utilisateur(id)
+);
+
+CREATE TABLE HistoriqueFonds(
+   id SERIAL,
+   date_transaction TIMESTAMP NOT NULL,
+   montant NUMERIC(20,5)   NOT NULL,
+   type VARCHAR(50) ,
+   id_portefeuille INTEGER NOT NULL,
+   PRIMARY KEY(id),
+   FOREIGN KEY(id_portefeuille) REFERENCES Portefeuille(id)
+);
+
+CREATE TABLE SoldeCrypto(
+   id SERIAL,
+   quantite_crypto NUMERIC(20,6)   NOT NULL,
+   dernier_maj TIMESTAMP,
+   id_cryptomonnaies INTEGER NOT NULL,
+   id_portefeuille INTEGER NOT NULL,
+   PRIMARY KEY(id),
+   FOREIGN KEY(id_cryptomonnaies) REFERENCES Cryptomonnaies(id),
+   FOREIGN KEY(id_portefeuille) REFERENCES Portefeuille(id)
+);
+
