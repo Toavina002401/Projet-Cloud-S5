@@ -1,9 +1,0 @@
-services:
-  postgres:
-    image: 'postgres:15'
-    environment:
-      - 'POSTGRES_DB=ProjetCloudS5'
-      - 'POSTGRES_PASSWORD=Belouh'
-      - 'POSTGRES_USER=postgres'
-    ports:
-      - '5432'
