@@ -36,10 +36,8 @@ RUN echo '<VirtualHost *:80>\n\
     CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-# Installer les dépendances du projet Symfony et pré-compiler le cache
-RUN composer install --no-dev --optimize-autoloader --classmap-authoritative && \
-    php bin/console cache:clear --no-warmup && \
-    php bin/console cache:warmup
+# Installer les dépendances du projet Symfony en mode production
+RUN composer install --no-dev --optimize-autoloader --classmap-authoritative
 
 # Définir les permissions pour le cache/logs de Symfony
 RUN chown -R www-data:www-data /var/www/html/var
