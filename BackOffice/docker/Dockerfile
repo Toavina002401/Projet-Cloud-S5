@@ -14,6 +14,13 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Activation du mod_rewrite pour Apache
 RUN a2enmod rewrite
 
+# Active l'extension sodium pour PHP
+RUN docker-php-ext-enable sodium
+
+# Ajouter l'extension sodium dans php.ini
+RUN echo "extension=sodium" >> /usr/local/etc/php/conf.d/docker-php.ini
+
+
 # Définir les variables d'environnement pour Symfony
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
@@ -36,13 +43,8 @@ RUN echo '<VirtualHost *:80>\n\
     CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-# Installer les dépendances du projet Symfony et pré-compiler le cache
-RUN composer install --no-dev --optimize-autoloader --classmap-authoritative && \
-    php bin/console cache:clear --no-warmup && \
-    php bin/console cache:warmup
-
-# Définir les permissions pour le cache/logs de Symfony
-RUN chown -R www-data:www-data /var/www/html/var
+# # Définir les permissions pour le cache/logs de Symfony
+# RUN chown -R www-data:www-data /var/www/html/var
 
 # Exposer le port 80
 EXPOSE 80

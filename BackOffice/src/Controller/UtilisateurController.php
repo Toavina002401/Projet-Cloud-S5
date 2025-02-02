@@ -14,6 +14,7 @@ use App\Entity\PIN;
 use App\Service\MailerService;
 use App\Entity\Utilisateur;
 use App\Entity\TentativesConnexion;
+use App\Service\FirebaseService;
 use Symfony\Component\Mailer\MailerInterface;
 use OpenApi\Annotations as OA;
 
@@ -128,10 +129,10 @@ class UtilisateurController extends AbstractController
      * )
      */
     #[Route('/api/validate-pin-inscription', name: 'validate_pin', methods: ['POST'])]
-    public function validatePin(Request $request, EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository): JsonResponse
+    public function validatePin(Request $request,FirebaseService $firebaseSvc,EntityManagerInterface $em, UtilisateurRepository $utilisateurRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        return $utilisateurRepository->validationPinInscription($data,$em);
+        return $utilisateurRepository->validationPinInscription($data,$em,$firebaseSvc);
     }
 
 

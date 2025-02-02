@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Utilisateur;
 use App\Entity\Session;
 use App\Entity\TentativesConnexion;
+use App\Service\FirebaseService;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Service\ResponseHelper;
@@ -101,7 +102,7 @@ class UtilisateurRepository extends ServiceEntityRepository
         }
     }
 
-    public function validationPinInscription($data, $em): JsonResponse
+    public function validationPinInscription($data, $em,FirebaseService $firebaseSvc): JsonResponse
     {
         $timezone = new \DateTimeZone('Europe/Moscow');
     
@@ -142,6 +143,14 @@ class UtilisateurRepository extends ServiceEntityRepository
         $utilisateur = $pin->getUtilisateur();
         $utilisateur->setActif(true);
     
+        // 🔥 Inscription sur Firebase
+        try {
+            $firebaseUser = $firebaseSvc->createUser($utilisateur->getEmail(), $utilisateur->getMdp());
+            $utilisateur->setFirebaseUid($firebaseUser->uid);  // Stocker l'UID Firebase
+        } catch (\Exception $e) {
+            return $this->responseHelper->jsonResponse('erreur', null, 'Erreur lors de l\'inscription sur Firebase : ' . $e->getMessage(), null);
+        }
+
         $em->remove($pin);
         $em->flush();
     

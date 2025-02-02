@@ -8,6 +8,7 @@ services:
       - "8080:80"
     volumes:
       - ../:/var/www/html
+      - ../config/firebase_credentials.json:/var/www/html/config/firebase_credentials.json
     environment:
       APP_ENV: prod
     depends_on:
