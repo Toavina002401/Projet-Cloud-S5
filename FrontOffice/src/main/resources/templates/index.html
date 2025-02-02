@@ -1,26 +1,133 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Frontend SpringBoot</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-    }
+  <head th:replace="~{fragments.html :: head-content}"></head>
+</html>
 
-    h1 {
-      font-size: 2.3rem;
-    }
-  </style>
-</head>
-<body>
-    <h1>Frontend du <span th:text="${nom}"></span> en Spring Boot ✅ </h1>
-</body>
+
+
+  <body class="vertical  light  ">
+    <div class="wrapper">
+
+      <!-- TopPanel  -->
+    <div th:replace="~{fragments.html :: topPanel}"></div>
+      
+      <!-- Sidebar   -->
+    <div th:insert="~{fragments.html :: sidebar}"></div>
+
+      
+      <main role="main" class="main-content">
+
+        <div class="container-fluid">
+          <div class="row justify-content-center">
+            <div class="col-12">
+              <div class="row">
+
+                <!-- <h3> Lien Google Sheet : https://docs.google.com/spreadsheets/d/1N9Cf7tioxJxChFK4XmtcgK6fhmd7zjx-Y6H9raRyyzc/edit?usp=sharing </h3>
+                 
+                -->
+
+                <a href="https://docs.google.com/spreadsheets/d/1N9Cf7tioxJxChFK4XmtcgK6fhmd7zjx-Y6H9raRyyzc/edit?usp=sharing"> Vers To Do list</a> 
+                
+
+                
+                <div class="col-md-6 col-xl-3 mb-4">
+                  <div class="card shadow bg-primary text-white border-0">
+                    <div class="card-body">
+                      <div class="row align-items-center">
+                        <div class="col-3 text-center">
+                          <span class="circle circle-sm bg-primary-light">
+                            <i class="fe fe-16 fe-shopping-bag text-white mb-0"></i>
+                          </span>
+                        </div>
+                        <div class="col pr-0">
+                          <p class="small text-muted mb-0">Monthly Sales</p>
+                          <span class="h3 mb-0 text-white">$1250</span>
+                          <span class="small text-muted">+5.5%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 col-xl-3 mb-4">
+                  <div class="card shadow border-0">
+                    <div class="card-body">
+                      <div class="row align-items-center">
+                        <div class="col-3 text-center">
+                          <span class="circle circle-sm bg-primary">
+                            <i class="fe fe-16 fe-shopping-cart text-white mb-0"></i>
+                          </span>
+                        </div>
+                        <div class="col pr-0">
+                          <p class="small text-muted mb-0">Orders</p>
+                          <span class="h3 mb-0">1,869</span>
+                          <span class="small text-success">+16.5%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 col-xl-3 mb-4">
+                  <div class="card shadow border-0">
+                    <div class="card-body">
+                      <div class="row align-items-center">
+                        <div class="col-3 text-center">
+                          <span class="circle circle-sm bg-primary">
+                            <i class="fe fe-16 fe-filter text-white mb-0"></i>
+                          </span>
+                        </div>
+                        <div class="col">
+                          <p class="small text-muted mb-0">Conversion</p>
+                          <div class="row align-items-center no-gutters">
+                            <div class="col-auto">
+                              <span class="h3 mr-2 mb-0"> 86.6% </span>
+                            </div>
+                            <div class="col-md-12 col-lg">
+                              <div class="progress progress-sm mt-2" style="height:3px">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 87%" aria-valuenow="87" aria-valuemin="0" aria-valuemax="100"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6 col-xl-3 mb-4">
+                  <div class="card shadow border-0">
+                    <div class="card-body">
+                      <div class="row align-items-center">
+                        <div class="col-3 text-center">
+                          <span class="circle circle-sm bg-primary">
+                            <i class="fe fe-16 fe-activity text-white mb-0"></i>
+                          </span>
+                        </div>
+                        <div class="col">
+                          <p class="small text-muted mb-0">AVG Orders</p>
+                          <span class="h3 mb-0">$80</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              
+
+
+            </div>
+          </div>
+        </div>
+   
+      </main>
+
+    </div>
+    
+
+    <head th:replace="~{fragments.html :: script-content}"></head>
+
+    
+  </body>
+
+   <a href="https://docs.google.com/spreadsheets/d/1N9Cf7tioxJxChFK4XmtcgK6fhmd7zjx-Y6H9raRyyzc/edit?usp=sharing"> Vers To Do list</a> 
 </html>

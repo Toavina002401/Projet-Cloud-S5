@@ -1,93 +1,67 @@
-# Projet-Cloud-S5
+# README: Docker Symfony Setup with Doctrine
 
-# Emplacements des Livrables Demandés
+## Overview
+This guide describes how to set up a Symfony application in a Dockerized environment with PostgreSQL, including the ability to execute Doctrine commands (e.g., database creation, schema migrations) within the container.
 
-1. **BackOffice**
-   - Tous les projets ou API développés avec Symfony sont disponibles dans ce dossier.
-
-2. **Dossier MCD**
-   - Contient le modèle conceptuel de données pour visualiser la conception de notre base de données.
-
-3. **Dossier Postman**
-   - Contient la collection des API de notre projet, prête à être importée dans Postman.
-
-4. **Todo-liste**
-   - Retrouvez notre liste de tâches à l'aide de ce lien :
-     [Accéder à la Todo-liste](https://docs.google.com/spreadsheets/d/1N9Cf7tioxJxChFK4XmtcgK6fhmd7zjx-Y6H9raRyyzc/edit?usp=sharing)
-
-5. **Projet GitHub**
-   - Le projet est accessible sur notre dépôt GitHub via ce lien :
-     [Voir le Projet sur GitHub](https://github.com/Toavina002401/Projet-Cloud-S5)
-
-6. **Documentation Swagger**
-   - Pour accéder à la liste complète des API disponibles :
-     1. Lancez le projet.
-     2. Accédez à la documentation Swagger via l'URL suivante :
-        [http://127.0.0.1:8080/doc](http://127.0.0.1:8080/doc).
-
-
-
-# Les instructions pour lancer les applications (Projet-Cloud-S5).
-
-## Scénarios d'utilisations
-Ce guide explique comment configurer notre projet (Projet-Cloud-S5) dans un environnement Dockerisé avec PostgreSQL. 
+## Prerequisites
+- Docker and Docker Compose installed on your system.
+- Symfony project ready in the working directory.
 
 ---
 
-## 1. Configuration de Docker
-Les fichier `docker-compose.yml` et `Dockerfile` sont configurés pour un projet Symfony avec PostgreSQL dans le repertoire BackOffice/docker/.
+## 1. Docker Setup
 
 ---
 
-## 2. Construction et démarrage des conteneurs
-Exécutez les commandes suivantes pour construire et démarrer les conteneurs Docker (Execute cela dans le repertoire BackOffice/docker/):
+## 2. Building and Starting Containers
+
+Run the following commands to build and start the Docker containers:
 
 ```bash
-docker-compose down  # Arrêter les conteneurs existants
-docker-compose up --build -d  # Construire et démarrer les conteneurs en mode détaché
+docker-compose down  # Stop any existing containers
+docker-compose up --build -d  # Build and start containers in detached mode
 ```
 
 ---
 
-## 3. Interaction avec Doctrine
+## 3. Interacting with Doctrine
 
-### Accéder au conteneur PHP
-Pour exécuter des commandes Symfony ou Doctrine, accédez au conteneur PHP :
+### Access the PHP Container
+To execute Symfony or Doctrine commands, access the PHP container:
 
 ```bash
 docker exec -it container_php bash
 ```
 
-### Configuration du base
-La variable `DATABASE_URL` est correctement définie dans notre fichier `.env` ou dans la section `environment` de notre fichier `docker-compose.yml` :
+### Doctrine Commands
+Ensure the `DATABASE_URL` is correctly set in your `.env` file or in the `docker-compose.yml` environment section:
 
-```env
+```
 DATABASE_URL="pgsql://postgres:Belouh@db:5432/ProjetCloudS5"
 ```
 
-#### Créer la base de données
-Exécutez la commande suivante pour créer la base de données :
+#### Create the Database
+Run the following command to create the database:
 
 ```bash
-php bin/console doctrine:database:create
+php bin/console doctrine:database:create 
 ```
 
-#### Créer le schéma de la base de données
-Générez et appliquez le schéma avec la commande :
+#### Create the Database Schema
+Generate and apply the schema:
 
 ```bash
 php bin/console doctrine:schema:create
 ```
 
-#### Exécuter les migrations
-
-Générez un fichier de migration avec :
+#### Run Migrations
+Generate a migration file:
 
 ```bash
 php bin/console make:migration
 ```
 
-Appliquez les migrations en utilisant :
+Apply the migrations:
 
 ```bash
 php bin/console doctrine:migrations:migrate
@@ -95,13 +69,47 @@ php bin/console doctrine:migrations:migrate
 
 ---
 
-## 4. Démarrage du projet dans le docker
+## 4. Debugging and Rebuilding Containers
 
-### Verification des conteneur
-Assurer vous que les contenaire comme `container_db` et `container_php` marche bien sans erreur dans le docker. 
+### Rebuild the PHP Container
+If you make changes to the `Dockerfile`, rebuild the PHP container:
 
+```bash
+docker-compose up --build -d
+```
 
-### Direction vers une navigateur
-Pour demarrer maintenant le projet (Projet-Cloud-S5) tapez cette lien dans le navigateur :[http://127.0.0.1:8080](http://127.0.0.1:8080/)
+### Logs
+View logs to debug issues:
 
+```bash
+docker-compose logs -f
+```
 
+---
+
+## 5. Useful Commands
+
+- **Stop Containers:**
+  ```bash
+  docker-compose down
+  ```
+
+- **Start Containers:**
+  ```bash
+  docker-compose up -d
+  ```
+
+- **Access PHP Container:**
+  ```bash
+  docker exec -it container_php bash
+  ```
+
+- **Access PostgreSQL Container:**
+  ```bash
+  docker exec -it container_db bash
+  ```
+
+  
+## ###############################################3
+## ###############################################3
+FrontOffice : Springboot : run " spring-boot:run " (avec initialisation du docker automatically)

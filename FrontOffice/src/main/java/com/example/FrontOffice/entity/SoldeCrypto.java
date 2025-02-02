@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import org.hibernate.annotations.UpdateTimestamp;
+
 @Entity
 public class SoldeCrypto {
 
@@ -11,10 +13,12 @@ public class SoldeCrypto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "quantite_crypto", precision = 20, scale = 6)
+    @Column(name = "quantite_crypto", precision = 20, scale = 6, nullable = false)
+    
     private BigDecimal quantiteCrypto;
 
-    @Column(name = "dernier_maj")
+    @Column(name = "dernier_maj", updatable = false)
+    @UpdateTimestamp
     private Timestamp dernierMaj;
 
     @ManyToOne
@@ -24,6 +28,12 @@ public class SoldeCrypto {
     @ManyToOne
     @JoinColumn(name = "id_portefeuille", nullable = false)
     private Portefeuille portefeuille;
+
+    public SoldeCrypto() {
+        // Constructeur par défaut requis par JPA
+    }
+
+    // Getters et Setters
 
     public Long getId() {
         return id;
@@ -64,7 +74,4 @@ public class SoldeCrypto {
     public void setPortefeuille(Portefeuille portefeuille) {
         this.portefeuille = portefeuille;
     }
-
-    public SoldeCrypto(){}
-
 }

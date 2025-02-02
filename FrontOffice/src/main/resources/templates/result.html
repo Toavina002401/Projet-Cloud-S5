@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments.html :: head-content}">
+    <title>Prix des Cryptomonnaies</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body class="vertical light">
+    <div class="wrapper">
+      <!-- Top Panel -->
+      <div th:replace="~{fragments.html :: topPanel}"></div>
+
+      <!-- Sidebar -->
+      <div th:insert="~{fragments.html :: sidebar}"></div>
+
+      <main role="main" class="main-content">
+        <div class="container-fluid">
+          <div class="row justify-content-center">
+            <div class="col-12">
+              <div class="card shadow border-0 mb-4">
+                <div class="card-header">
+                  <h3 class="card-title">Évolution des prix des cryptomonnaies</h3>
+                </div>
+                <div class="card-body">
+                  <canvas id="cryptoChart" width="800" height="400"></canvas>
+                </div>
+              </div>
+
+              <div class="text-center">
+                <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <head th:replace="~{fragments.html :: script-content}"></head>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('cryptoChart').getContext('2d');
+    
+            if (!ctx) {
+                console.error("Canvas context non trouvé.");
+                return;
+            }
+    
+            // Configuration des couleurs pour chaque cryptomonnaie
+            const colors = {
+                BTC: { border: 'rgba(255, 99, 132, 1)', background: 'rgba(255, 99, 132, 0.2)' },
+                ETH: { border: 'rgba(54, 162, 235, 1)', background: 'rgba(54, 162, 235, 0.2)' },
+                LTC: { border: 'rgba(75, 192, 192, 1)', background: 'rgba(75, 192, 192, 0.2)' }
+            };
+    
+            // Données initiales
+            const labels = []; // Temps
+            const datasets = Object.keys(colors).map(symbol => ({
+                label: `${symbol} - Prix`,
+                data: [],
+                type: 'line',
+                borderColor: colors[symbol].border,
+                backgroundColor: colors[symbol].background,
+                tension: 0.3,
+                yAxisID: 'y'
+            }));
+    
+            const data = {
+                labels: labels,
+                datasets: datasets
+            };
+    
+            // Configuration du graphique
+            const config = {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'second'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Temps',
+                                color: '#333'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Prix (EUR)',
+                                color: '#333'
+                            },
+                            beginAtZero: false
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            };
+    
+            // Créer le graphique
+            let cryptoChart;
+            try {
+                cryptoChart = new Chart(ctx, config);
+            } catch (error) {
+                console.error('Erreur lors de l\'initialisation du graphique :', error);
+                return;
+            }
+    
+            // Fonction de mise à jour des données
+            function updateChart() {
+                fetch('/api/crypto-prices')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erreur lors de la récupération des données');
+                        }
+                        return response.json();
+                    })
+                    .then(prices => {
+                        // Vérification des données
+                        if (!prices || typeof prices !== 'object') {
+                            throw new Error('Données invalides reçues de l\'API');
+                        }
+    
+                        const keys = ['BTC', 'ETH', 'LTC'];
+                        keys.forEach(key => {
+                            if (!(key in prices)) {
+                                console.warn(`Données manquantes pour ${key}`);
+                                prices[key] = 0;  // Assurez-vous d'avoir une valeur par défaut si les données sont manquantes
+                            }
+                        });
+    
+                        const now = new Date();
+                        labels.push(now);
+    
+                        datasets.forEach(dataset => {
+                            const symbol = dataset.label.split(' ')[0];
+                            dataset.data.push(prices[symbol] || 0);
+    
+                            // Limiter le nombre de points de données (20 derniers)
+                            if (dataset.data.length > 20) {
+                                dataset.data.shift();
+                            }
+                        });
+    
+                        // Limiter le nombre d'étiquettes de temps
+                        if (labels.length > 20) {
+                            labels.shift();
+                        }
+    
+                        try {
+                            cryptoChart.update();
+                        } catch (error) {
+                            console.error('Erreur lors de la mise à jour du graphique :', error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la mise à jour du graphique :', error);
+                    });
+            }
+    
+            // Mettre à jour le graphique toutes les 5 secondes
+            setInterval(updateChart, 5000);
+        });
+    </script>
+    
+    </div>
+  </body>
+</html>

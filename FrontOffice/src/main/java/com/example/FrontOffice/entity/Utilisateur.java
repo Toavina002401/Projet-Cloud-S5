@@ -1,6 +1,7 @@
 package com.example.FrontOffice.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Entity
@@ -21,6 +22,10 @@ public class Utilisateur {
 
     private Boolean actif;
 
+    @Column(name = "solde")
+    private BigDecimal solde;  // Nouveau champ pour le solde de l'utilisateur
+
+    // Getters et setters
     public Long getId() {
         return id;
     }
@@ -69,5 +74,15 @@ public class Utilisateur {
         this.actif = actif;
     }
 
-    public Utilisateur(){}
+    public BigDecimal getSolde() {
+        return solde;
+    }
+
+    public void setSolde(BigDecimal solde) {
+        this.solde = solde;
+    }
+
+    public Utilisateur() {
+        this.solde = BigDecimal.ZERO;  // Initialiser à zéro
+    }
 }

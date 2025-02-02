@@ -5,8 +5,7 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libpq-dev \
-    libzip-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip
+    && docker-php-ext-install pdo pdo_pgsql
 
 # Installation de Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -28,13 +27,12 @@ COPY . /var/www/html/
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf
 
 # Installer les dépendances du projet Symfony et pré-compiler le cache
-RUN composer install --no-dev --optimize-autoloader --classmap-authoritative --no-scripts && \
+RUN composer install --no-dev --optimize-autoloader --classmap-authoritative && \
     php bin/console cache:clear --no-warmup && \
     php bin/console cache:warmup
 
 # Définir les permissions pour le cache/logs de Symfony
-RUN chown -R www-data:www-data /var/www/html/var && \
-    chmod -R 775 /var/www/html/var
+RUN chown -R www-data:www-data /var/www/html/var
 
 # Exposer le port 80
 EXPOSE 80

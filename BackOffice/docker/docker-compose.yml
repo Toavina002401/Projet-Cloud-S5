@@ -18,10 +18,10 @@ services:
     container_name: container_db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: B123
+      POSTGRES_PASSWORD: Belouh
       POSTGRES_DB: ProjetCloudS5
     ports:
-      - "5433:5433"
+      - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 
