@@ -13,10 +13,10 @@ public class SoldeCrypto {
     private BigDecimal quantiteCrypto;
     @Column(name = "dernier_maj")
     private Timestamp dernierMaj;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_cryptomonnaies", nullable = false)
     private Cryptomonnaies cryptomonnaies;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_portefeuille", nullable = false)
     private Portefeuille portefeuille;
     public Long getId() {

@@ -37,7 +37,7 @@ RUN echo '<VirtualHost *:80>\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
 # Installer les dépendances du projet Symfony en mode production
-# RUN composer install --no-dev --optimize-autoloader --classmap-authoritative
+RUN composer install --no-dev --optimize-autoloader --classmap-authoritative
 
 # Définir les permissions pour le cache/logs de Symfony
 RUN chown -R www-data:www-data /var/www/html/var

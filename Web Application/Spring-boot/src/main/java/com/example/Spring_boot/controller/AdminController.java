@@ -14,4 +14,6 @@ public class AdminController {
         model.addAttribute("nom", projet);
         return "index";
     }
+
+    
 }

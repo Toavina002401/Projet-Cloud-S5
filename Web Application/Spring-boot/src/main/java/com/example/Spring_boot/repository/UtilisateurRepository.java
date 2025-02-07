@@ -6,5 +6,5 @@ import com.example.Spring_boot.modules.*;
 
 @Repository
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> {
-    
+
 }

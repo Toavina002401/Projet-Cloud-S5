@@ -14,6 +14,7 @@ public class Utilisateur {
     @Column(name = "date_creation")
     private Timestamp dateCreation;
     private Boolean actif;
+
     public Long getId() {
         return id;
     }
