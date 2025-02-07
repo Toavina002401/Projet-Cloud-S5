@@ -13,24 +13,64 @@ import BottomNav from "./components/BottomNav";
 
 const queryClient = new QueryClient();
 
+// Créer un composant de mise en page qui inclut BottomNav
+const LayoutWithNav = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <>
+      <div className="flex flex-col min-h-screen">
+        {children}
+      </div>
+      <BottomNav />
+    </>
+  );
+};
+
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-crypto-dark">
+        <div className="min-h-screen bg-crypto-dark overflow-hidden">
           <Toaster />
           <Sonner />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/user" element={<UserInfo />} />
-              <Route path="/crypto" element={<CryptoList />} />
-              <Route path="/wallet" element={<DepositWithdraw />} />
+              {/* Utiliser le LayoutWithNav pour les routes qui nécessitent BottomNav */}
+              <Route
+                path="/home"
+                element={
+                  <LayoutWithNav>
+                    <Home />
+                  </LayoutWithNav>
+                }
+              />
+              <Route
+                path="/user"
+                element={
+                  <LayoutWithNav>
+                    <UserInfo />
+                  </LayoutWithNav>
+                }
+              />
+              <Route
+                path="/crypto"
+                element={
+                  <LayoutWithNav>
+                    <CryptoList />
+                  </LayoutWithNav>
+                }
+              />
+              <Route
+                path="/wallet"
+                element={
+                  <LayoutWithNav>
+                    <DepositWithdraw />
+                  </LayoutWithNav>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <BottomNav />
           </BrowserRouter>
         </div>
       </TooltipProvider>

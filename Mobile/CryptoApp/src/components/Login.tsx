@@ -20,7 +20,7 @@ const Login = () => {
       return;
     }
     // For demo purposes, we'll just navigate to the dashboard
-    navigate("/dashboard");
+    navigate("/home");
   };
 
   return (
