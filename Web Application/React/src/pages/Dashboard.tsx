@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import CryptoFavoris from "@/components/CryptoFavoris";
-import CryptoMultiLineChart from "@/components/CryptoMultiLineChart";
 import Navbar from "@/components/Navbar"; 
 import { useNavigate } from "react-router-dom";
 import Transactions from "@/components/Transactions";
@@ -56,16 +55,6 @@ const Dashboard = () => {
             {/* CryptoChart Section */}
             <div className="space-y-6">
               <CryptoFavoris />
-            </div>
-
-            {/* CryptoMultiLineChart Section */}
-            <div className="py-8">
-              <h2 className="text-3xl font-bold mb-6 text-center">
-                Cryptocurrency Evolution 12h
-              </h2>
-              <div className="flex justify-center">
-                <CryptoMultiLineChart />
-              </div>
             </div>
           </div>
         </div>

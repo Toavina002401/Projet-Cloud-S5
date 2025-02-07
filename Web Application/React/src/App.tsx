@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Transactions from "./pages/Transaction";
 import Analyse from "./pages/Alea1";
 import Modifier from "./pages/Alea2";
 import Tableau from "./pages/Alea3";
@@ -27,7 +26,6 @@ const App = () => (
           <Route path="/" element={<Login />} />
           <Route path="/home" element={<Dashboard />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/transaction" element={<Transactions />} />
           <Route path="/analyseCrypto" element={<Analyse />} />
           <Route path="/modifCommission" element={<Modifier />} />
           <Route path="/tableau" element={<Tableau />} />
