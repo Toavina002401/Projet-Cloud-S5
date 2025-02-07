@@ -36,8 +36,11 @@ RUN echo '<VirtualHost *:80>\n\
     CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
+# Installer NelmioCorsBundle
+RUN composer require nelmio/cors-bundle
+
 # Installer les dépendances du projet Symfony en mode production
-# RUN composer install --no-dev --optimize-autoloader --classmap-authoritative
+RUN composer install --no-dev --optimize-autoloader --classmap-authoritative --no-cache
 
 # Définir les permissions pour le cache/logs de Symfony
 RUN chown -R www-data:www-data /var/www/html/var
