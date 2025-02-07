@@ -1,16 +1,22 @@
 package com.example.Spring_boot.controller;
 
+import com.example.Spring_boot.modules.Cryptomonnaies;
 import com.example.Spring_boot.modules.HistoriqueFonds;
 import com.example.Spring_boot.modules.Portefeuille;
+import com.example.Spring_boot.modules.SoldeCrypto;
+import com.example.Spring_boot.modules.TransactionCryptoRequest;
 import com.example.Spring_boot.modules.TransactionRequest;
 import com.example.Spring_boot.modules.Utilisateur;
+import com.example.Spring_boot.repository.CryptomonnaiesRepository;
 import com.example.Spring_boot.repository.HistoriqueFondsRepository;
 import com.example.Spring_boot.repository.PortefeuilleRepository;
 import com.example.Spring_boot.repository.UtilisateurRepository;
 import com.example.Spring_boot.services.HistoriqueFondsService;
 import com.example.Spring_boot.services.PortefeuilleService;
 import com.example.Spring_boot.services.ResponseHelper;
+import com.example.Spring_boot.services.SoldeCryptoService;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +35,9 @@ import org.springframework.http.ResponseEntity;
 public class ApiController {
 
     @Autowired
+    private CryptomonnaiesRepository cryptomonnaiesRepository;
+
+    @Autowired
     private PortefeuilleService portefeuilleService;
 
     @Autowired
@@ -42,6 +51,9 @@ public class ApiController {
 
     @Autowired
     private HistoriqueFondsRepository historiqueFondsRepository;
+
+    @Autowired
+    private SoldeCryptoService soldeCryptoService;
 
     @Autowired
     private ResponseHelper responseHelper;
@@ -132,6 +144,38 @@ public class ApiController {
             historiqueFondsRepository.save(historiqueFonds);
 
             return responseHelper.jsonResponse("success", portefeuille, "Retrait successfully processed", null);
+        } catch (Exception e) {
+            return responseHelper.jsonResponse("error", null, e.getMessage(), null);
+        }
+    }
+
+    @GetMapping("/api/getAllCrypto")
+    public ResponseEntity<?> getAllCrypto() {
+        try {
+            List<Cryptomonnaies> cryptomonnaiesList = cryptomonnaiesRepository.findAll();
+            return responseHelper.jsonResponse("success", cryptomonnaiesList, null, null);
+        } catch (Exception e) {
+            return responseHelper.jsonResponse("error", null, e.getMessage(), null);
+        }
+    }
+
+    @PostMapping("/api/transactionCrypto")
+    public ResponseEntity<?> transactionCrypto(@RequestBody TransactionCryptoRequest trans) {
+        try {
+            SoldeCrypto soldeCrypto = new SoldeCrypto();
+            soldeCrypto.setQuantiteCrypto(BigDecimal.valueOf(trans.getQuantiteCrypto())); 
+            soldeCrypto.setPrixCrypto(BigDecimal.valueOf(trans.getPrixCrypto()));
+            soldeCrypto.setType(trans.getType());
+            soldeCrypto.setDernierMaj(new Timestamp(System.currentTimeMillis()));
+                  
+            Cryptomonnaies crypto = cryptomonnaiesRepository.findById(trans.getIdCrypto()).orElseThrow(() -> new RuntimeException("Cryptomonnaies non trouvé"));
+            Portefeuille portefeuille = portefeuilleRepository.findById(trans.getIdPorteFeuille()).orElseThrow(() -> new RuntimeException("Portefeuille non trouvé"));
+        
+            soldeCrypto.setCryptomonnaies(crypto);
+            soldeCrypto.setPortefeuille(portefeuille);
+
+            SoldeCrypto sol = soldeCryptoService.saveSoldeCrypto(soldeCrypto);
+            return responseHelper.jsonResponse("success", sol, null, null);
         } catch (Exception e) {
             return responseHelper.jsonResponse("error", null, e.getMessage(), null);
         }

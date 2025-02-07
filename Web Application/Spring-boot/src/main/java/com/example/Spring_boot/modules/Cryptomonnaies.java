@@ -10,6 +10,8 @@ public class Cryptomonnaies {
     private Long id;
     private String nom;
     private String symbole;
+    private Double baseprise;
+
     public Long getId() {
         return id;
     }
@@ -27,6 +29,14 @@ public class Cryptomonnaies {
     }
     public void setSymbole(String symbole) {
         this.symbole = symbole;
+    }
+
+    public Double getBaseprise() {
+        return baseprise;
+    }
+
+    public void setBaseprise(Double baseprise) {
+        this.baseprise = baseprise;
     }
     public Cryptomonnaies(){}
 }
