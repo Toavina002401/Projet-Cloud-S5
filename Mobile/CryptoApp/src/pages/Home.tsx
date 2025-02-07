@@ -1,15 +1,19 @@
 import { Card } from "@/components/ui/card";
 import { LineChart, ArrowUpRight, Wallet, User } from "lucide-react";
+import { useAuth } from "../auth/AuthProvider";
 
 const Home = () => {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-crypto-dark text-white p-4 pb-20 animate-fadeIn">
       <div className="max-w-md mx-auto space-y-6">
+
         {/* Welcome Section */}
-        <div className="text-left">
-          <h1 className="text-2xl font-bold">Welcome back</h1>
-          <p className="text-crypto-primary">John Doe</p>
-        </div>
+      <div className="text-left">
+        <h1 className="text-2xl font-bold">Welcome back</h1>
+        <p className="text-crypto-primary">{user ? user.displayName || "John Doe" : "Guest"}</p>
+      </div>
 
         {/* Portfolio Card */}
         <Card className="bg-crypto-card border-none p-6">

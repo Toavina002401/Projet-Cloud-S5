@@ -3,13 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { toast } from "./ui/use-toast";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../config/firebase"; // assuming you've set up firebase.js or firebase.ts
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast({
@@ -19,8 +22,41 @@ const Login = () => {
       });
       return;
     }
-    // For demo purposes, we'll just navigate to the dashboard
-    navigate("/home");
+
+    setLoading(true);
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Store the token if needed (for session management)
+      const token = await user.getIdToken();
+      localStorage.setItem('firebaseToken', token);
+
+      navigate("/home");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: getErrorMessage(error.code),
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getErrorMessage = (code: string): string => {
+    switch (code) {
+      case "auth/invalid-email":
+        return "Invalid email format.";
+      case "auth/user-disabled":
+        return "Your account has been disabled.";
+      case "auth/user-not-found":
+      case "auth/wrong-password":
+        return "Incorrect email or password.";
+      default:
+        return "Error logging in.";
+    }
   };
 
   return (
@@ -80,8 +116,9 @@ const Login = () => {
             <Button
               type="submit"
               className="w-full crypto-button"
+              disabled={loading}
             >
-              Sign In
+              {loading ? "Signing In..." : "Sign In"}
             </Button>
           </div>
         </form>

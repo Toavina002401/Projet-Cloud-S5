@@ -1,4 +1,9 @@
 import { useState, useRef } from "react";
+import { signOut } from 'firebase/auth';
+import { auth } from '../config/firebase';  // Assurez-vous que le chemin vers votre configuration Firebase est correct.
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../auth/AuthProvider"
+
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -8,6 +13,13 @@ import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 
 const UserInfo = () => {
+
+  const { user } = useAuth();  // Récupère l'utilisateur connecté 
+  const email = user ? user.email : "Not logged in";
+  const memberSince = user ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/A"; // Date de création du compte
+  const status = user ? "Active" : "Inactive";
+
+
   const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -18,9 +30,15 @@ const UserInfo = () => {
   const CLOUDINARY_UPLOAD_PRESET = "ml_default"; // Remplacez par votre upload preset
   const CLOUDINARY_CLOUD_NAME = "dylzjym6n"; // Remplacez par votre cloud name
 
-  const handleLogout = () => {
-    console.log("Déconnecté");
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem('firebaseToken');
+      console.log("Déconnecté");
+      window.location.href = "/login";  // Utilisez window.location.href ou la méthode navigate si vous souhaitez utiliser react-router
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    }
   };
 
   const handleImageError = () => {
@@ -150,7 +168,7 @@ const UserInfo = () => {
               )}
             </div>
             <div>
-              <h2 className="text-xl font-bold">John Doe</h2>
+              <h2 className="text-xl font-bold">{user ? user.displayName || "John Doe" : "Guest"}</h2>
               <p className="text-crypto-primary">Premium Member</p>
             </div>
           </div>
@@ -229,15 +247,15 @@ const UserInfo = () => {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-400">Email</span>
-              <span>john.doe@example.com</span>
+              <span>{email}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Member Since</span>
-              <span>Jan 2024</span>
+              <span>{memberSince}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Status</span>
-              <span className="text-crypto-primary">Active</span>
+              <span className="text-crypto-primary">{status}</span>
             </div>
           </div>
         </Card>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -11,49 +11,31 @@ import {
 import { Card } from "./ui/card";
 
 const MultiCryptoChart = () => {
-  // Sample data - in a real app, this would come from an API
-  const data = [
-    {
-      date: "2024-01",
-      ETH: 500,
-      BNB: 320,
-      SOL: 25,
-      ADA: 0.35,
-      XRP: 0.50,
-    },
-    {
-      date: "2024-02",
-      ETH: 550,
-      BNB: 350,
-      SOL: 27,
-      ADA: 0.38,
-      XRP: 0.55,
-    },
-    {
-      date: "2024-03",
-      ETH: 520,
-      BNB: 330,
-      SOL: 26,
-      ADA: 0.36,
-      XRP: 0.52,
-    },
-    {
-      date: "2024-04",
-      ETH: 305,
-      BNB: 360,
-      SOL: 29,
-      ADA: 0.40,
-      XRP: 0.60,
-    },
-    {
-      date: "2024-05",
-      ETH: 506,
-      BNB: 355,
-      SOL: 28,
-      ADA: 0.39,
-      XRP: 0.58,
-    },
-  ];
+  const generateRandomData = () => {
+    
+    const hours = ["00:00", "01:00", "02:00", "03:00", "04:00"];
+    
+    return hours.map((hour) => ({
+      time: hour,
+      AVAX: Math.floor(Math.random() * 50) + 10, 
+      BNB: Math.floor(Math.random() * 100) + 200,
+      SOL: Math.floor(Math.random() * 50) + 20,
+      ADA: Math.floor(Math.random() * 75) + 40,
+      XRP: Math.floor(Math.random() * 40) + 30, 
+      
+    }));
+  };
+  
+
+  const [data, setData] = useState(generateRandomData());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setData(generateRandomData());
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <Card className="p-4 bg-crypto-card border-none">
@@ -86,7 +68,7 @@ const MultiCryptoChart = () => {
             <Legend />
             <Line
               type="monotone"
-              dataKey="ETH"
+              dataKey="AVAX"
               stroke="#FF0000" // Rouge
               dot={false}
               strokeWidth={2}
