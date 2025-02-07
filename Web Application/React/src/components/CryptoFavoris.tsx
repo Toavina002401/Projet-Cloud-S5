@@ -8,11 +8,62 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-// Importation des icônes Ionicons
-import { IoStarOutline, IoStar } from "react-icons/io5"; // Icône étoile vide et pleine
+import { IoStarOutline, IoStar } from "react-icons/io5";
 
-// Initial data for 10 cryptocurrencies
-const generateCryptoData = () => {
+
+const getPrice10HeureAvant = (basePrice: number, currentTime: string) => {
+  const result = [];
+  let [hours, minutes] = currentTime.split(":").map(Number);
+
+  let price = basePrice;
+  for (let i = 0; i < 60; i++) {
+    price *= 1 + (Math.random() * 0.1 - 0.05);
+    const formattedHour = hours.toString().padStart(2, "0");
+    const formattedMinutes = minutes.toString().padStart(2, "0");
+
+    result.unshift({ heure: `${formattedHour}:${formattedMinutes}`, prix: price });
+    minutes -= 10;
+    if (minutes < 0) {
+      minutes += 60;
+      hours = (hours - 1 + 24) % 24;
+    }
+  }
+  return result;
+};
+
+const formatTime = (date: Date) => {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+};
+
+const getCurrentTime = () => {
+  return new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+};
+
+const crypto = () => {
+  const cryptos = [
+    { name: "Bitcoin", symbol: "BTC", basePrice: 48000 },
+    { name: "Ethereum", symbol: "ETH", basePrice: 2800 },
+    { name: "Binance Coin", symbol: "BNB", basePrice: 320 },
+    { name: "Cardano", symbol: "ADA", basePrice: 1.2 },
+    { name: "Solana", symbol: "SOL", basePrice: 100 },
+    { name: "Ripple", symbol: "XRP", basePrice: 0.5 },
+    { name: "Polkadot", symbol: "DOT", basePrice: 18 },
+    { name: "Dogecoin", symbol: "DOGE", basePrice: 0.08 },
+    { name: "Avalanche", symbol: "AVAX", basePrice: 85 },
+    { name: "Polygon", symbol: "MATIC", basePrice: 1.5 },
+  ];
+  return cryptos.map(crypto => {
+    const now = formatTime(new Date());
+    return {
+      ...crypto,
+      history: getPrice10HeureAvant(crypto.basePrice, now)
+    };
+  });
+};
+
+const generateCryptoData = (previousData = []) => {
   const cryptos = [
     { name: "Bitcoin", symbol: "BTC", basePrice: 48000 },
     { name: "Ethereum", symbol: "ETH", basePrice: 2800 },
@@ -26,54 +77,82 @@ const generateCryptoData = () => {
     { name: "Polygon", symbol: "MATIC", basePrice: 1.5 },
   ];
 
-  return cryptos.map(crypto => ({
-    ...crypto,
-    currentPrice: crypto.basePrice * (1 + (Math.random() * 0.1 - 0.05)),
-    priceChange: (Math.random() * 10 - 5).toFixed(2),
-  }));
+  return cryptos.map(crypto => {
+    // Trouver l'ancienne valeur du currentPrice si elle existe
+    const previousCrypto = previousData.find(c => c.symbol === crypto.symbol);
+    const previousPrice = previousCrypto ? previousCrypto.currentPrice : crypto.basePrice;
+
+    // Calculer le nouveau prix en appliquant une variation aléatoire entre -5% et +5%
+    const newPrice = previousPrice * (1 + (Math.random() * 0.1 - 0.05));
+
+    // Calculer la variation en pourcentage
+    const priceChange = ((newPrice - previousPrice) / previousPrice) * 100;
+
+    return {
+      ...crypto,
+      currentPrice: newPrice,
+      priceChange: priceChange.toFixed(2),
+    };
+  });
 };
+
 
 const CryptoFavorit = () => {
   const [selectedCrypto, setSelectedCrypto] = useState("BTC");
   const [cryptoData, setCryptoData] = useState(generateCryptoData());
+  const [cryptoHistory, setCryptoHistory] = useState<Record<string, { time: string, value: number }[]>>({});
+  const [cryptoDataHisto, setCryptoDataHisto] = useState(crypto());
+  const [chartDataHisto, setChartDataHisto] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
-  const [favoriteCryptos, setFavoriteCryptos] = useState<string[]>([]); // Liste des favoris
+  const [favoriteCryptos, setFavoriteCryptos] = useState<string[]>([]);
   const [notification, setNotification] = useState<string>("");
 
-  // Generate chart data for the selected cryptocurrency
-  const generateChartData = () => {
-    const timePoints = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
-    return timePoints.map(time => ({
-      time,
-      value: Math.random() * 1000 + 4000, // Random value for demonstration
-    }));
-  };
-
-  // Update data every 10 seconds
+  // Mise à jour des données toutes les 10 secondes
   useEffect(() => {
     const interval = setInterval(() => {
-      setCryptoData(generateCryptoData());
-      setChartData(generateChartData());
+      setCryptoData(prevCryptoData => {
+        const newCryptoData = generateCryptoData(prevCryptoData);
+
+        setCryptoHistory(prevHistory => {
+          const updatedHistory = { ...prevHistory };
+          newCryptoData.forEach(crypto => {
+            const newEntry = { time: getCurrentTime(), value: crypto.currentPrice };
+            if (!updatedHistory[crypto.symbol]) {
+              updatedHistory[crypto.symbol] = [];
+            }
+            updatedHistory[crypto.symbol] = [...updatedHistory[crypto.symbol], newEntry].slice(-10);
+          });
+
+          return updatedHistory;
+        });
+
+        return newCryptoData;
+      });
     }, 10000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Initialize chart data
   useEffect(() => {
-    setChartData(generateChartData());
-  }, [selectedCrypto]);
+    const selectedCryptoDataHisto = cryptoDataHisto.find(c => c.symbol === selectedCrypto);
+    if (selectedCryptoDataHisto) {
+      setChartDataHisto(selectedCryptoDataHisto.history.map(({ heure, prix }) => ({ time: heure, value: prix.toFixed(2) })));
+    }
+    setChartData(cryptoHistory[selectedCrypto] || []);
+  }, [selectedCrypto, cryptoHistory]);
+
+
 
   // Handle favorite change
   const handleFavoriteClick = (cryptoSymbol: string) => {
     if (favoriteCryptos.includes(cryptoSymbol)) {
       // Retirer des favoris
       setFavoriteCryptos(favoriteCryptos.filter(symbol => symbol !== cryptoSymbol));
-      setNotification(`You have removed ${cryptoSymbol} from your favorites.`);
+      setNotification(`Vous avez supprimé ${cryptoSymbol} de vos favoris.`);
     } else {
       // Ajouter aux favoris
       setFavoriteCryptos([...favoriteCryptos, cryptoSymbol]);
-      setNotification(`You have added ${cryptoSymbol} to your favorites.`);
+      setNotification(`Vous avez ajouté ${cryptoSymbol} à vos favoris.`);
     }
   };
 
@@ -86,7 +165,7 @@ const CryptoFavorit = () => {
       favoriteCryptos.forEach(symbol => {
         const favoriteCryptoData = cryptoData.find(c => c.symbol === symbol);
         if (favoriteCryptoData && favoriteCryptoData.priceChange !== "0") {
-          setNotification(`${favoriteCryptoData.name} price changed!`);
+          setNotification(`${favoriteCryptoData.name} prix modifié !`);
         }
       });
     }
@@ -126,7 +205,7 @@ const CryptoFavorit = () => {
         <div className="flex justify-between items-center">
           <div>
             <h3 className="text-2xl font-bold">{selectedCryptoData?.name} ({selectedCryptoData?.symbol})</h3>
-            <p className="text-sm text-muted-foreground">Last 24 hours</p>
+            <p className="text-sm text-muted-foreground">Graphique représentant l'évolution des prix sur les 10 dernières heures</p>
           </div>
           <div className="text-right">
             <p className="text-3xl font-bold">${selectedCryptoData?.currentPrice.toFixed(2)}</p>
@@ -143,22 +222,56 @@ const CryptoFavorit = () => {
           </div>
         )}
 
-        {/* Chart section wrapped in its own div */}
-        <div className="w-full h-[400px] md:h-[500px] lg:h-[600px] bg-card rounded-lg shadow-lg p-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#9b87f5" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#9b87f5" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: "#888888", fontSize: 12 }} domain={["auto", "auto"]} />
-              <Tooltip contentStyle={{ background: "rgba(26, 31, 44, 0.9)", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "8px" }} />
-              <Area type="monotone" dataKey="value" stroke="#9b87f5" fillOpacity={1} fill="url(#colorValue)" className="transition-all duration-300" />
-            </AreaChart>
-          </ResponsiveContainer>
+        <div className="grid grid-cols-12 gap-4">
+          {/* Premier graphique qui prend 7 colonnes */}
+          <div className="col-span-12 md:col-span-7 h-[350px] md:h-[400px] lg:h-[450px] bg-card rounded-lg shadow-lg p-3">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartDataHisto} margin={{ left: -20 }}>
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#9b87f5" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#9b87f5" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                <XAxis dataKey="time" interval="preserveStartEnd" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 11 }}/>
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#9b87f5"
+                  fillOpacity={1}
+                  fill="url(#colorValue)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Deuxième graphique qui prend 5 colonnes */}
+          <div className="col-span-12 md:col-span-5 h-[350px] md:h-[400px] lg:h-[450px] bg-card rounded-lg shadow-lg p-3">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ left: -21 }}>
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#9b87f5" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#9b87f5" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                <XAxis dataKey="time" interval="preserveStartEnd" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 9 }}/>
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#9b87f5"
+                  fillOpacity={1}
+                  fill="url(#colorValue)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </Card>

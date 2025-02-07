@@ -39,6 +39,11 @@ const LoginForm = () => {
           icon: "error",
         });
       }else{
+        // Stocker les informations de session
+        const { utilisateur, session } = response.data.data;
+        localStorage.setItem("user", JSON.stringify(utilisateur));
+        localStorage.setItem("token", session.token);
+
         Swal.fire({
           title: "Connexion réussie!",
           text: "Bienvenue sur la plateforme!",
