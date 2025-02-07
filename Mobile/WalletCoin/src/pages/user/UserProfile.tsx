@@ -1,10 +1,5 @@
 import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
-import axios from "axios";
-import { Cloudinary } from "@cloudinary/url-gen";
-import { auto } from "@cloudinary/url-gen/actions/resize";
-import { autoGravity } from "@cloudinary/url-gen/qualifiers/gravity";
-import { AdvancedImage } from "@cloudinary/react";
 
 const UserProfile = () => {
   const [image, setImage] = useState<string | null>(null);
@@ -17,21 +12,17 @@ const UserProfile = () => {
   const userName = "John"; // Replace with actual user name
   const userEmail = "john@hotmail.com"; // Replace with actual user email
 
-  // Cloudinary credentials
-  const cloudName = "dwalh5pwm"; // Replace with your Cloudinary cloud name
-  const uploadPreset = "k0a7hhw9"; // Replace with your upload preset
-
   const startCamera = async () => {
     try {
       if (videoRef.current) {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        console.log("Camera stream:", stream); // Vérifiez si le stream est bien récupéré
+        console.log("Camera stream:", stream); // Verify the stream
         videoRef.current.srcObject = stream;
         setIsCameraActive(true);
       }
     } catch (error) {
-      console.error("Erreur d'accès à la caméra:", error);
-      setImageError("Impossible d'accéder à la caméra.");
+      console.error("Error accessing the camera:", error);
+      setImageError("Unable to access the camera.");
     }
   };
 
@@ -48,27 +39,16 @@ const UserProfile = () => {
     if (videoRef.current && canvasRef.current) {
       const context = canvasRef.current.getContext("2d");
       if (context) {
-        // Dessine le cadre vidéo actuel sur le canvas
+        // Draw the current video frame to the canvas
         context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
         const imageData = canvasRef.current.toDataURL("image/png");
 
-        // Envoie l'image capturée à Cloudinary
-        const formData = new FormData();
-        formData.append("file", dataURLtoFile(imageData, "camera-image.png"));
-        formData.append("upload_preset", uploadPreset);
-
-        axios
-          .post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData)
-          .then((response) => {
-            setImage(response.data.secure_url); // Enregistre l'URL de l'image dans le state
-            setShowModal(false); // Ferme le modal
-          })
-          .catch((error) => {
-            console.error("Error uploading image: ", error);
-          });
+        // Save the captured image locally
+        setImage(imageData);
+        setShowModal(false); // Close the modal
       }
     } else {
-      setImageError("Erreur lors de la capture de l'image.");
+      setImageError("Error capturing the image.");
     }
   };
 
@@ -84,13 +64,6 @@ const UserProfile = () => {
     return new File([u8arr], filename, { type: mime });
   };
 
-  const cld = new Cloudinary({ cloud: { cloudName: cloudName } });
-  const img = cld
-    .image(image || "cld-sample-5")
-    .format("auto")
-    .quality("auto")
-    .resize(auto().gravity(autoGravity()).width(500).height(500));
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#1A1F2C] to-[#111827] p-4">
       <Card className="w-full max-w-md p-8 space-y-8 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl animate-fade-in">
@@ -100,7 +73,7 @@ const UserProfile = () => {
             onClick={() => setShowModal(true)}
           >
             {image ? (
-              <AdvancedImage cldImg={img} className="w-full h-full rounded-full object-cover" />
+              <img src={image} alt="User Profile" className="w-full h-full rounded-full object-cover" />
             ) : (
               <span className="text-4xl text-white font-bold">👤</span>
             )}
@@ -113,7 +86,7 @@ const UserProfile = () => {
 
         <div className="space-y-4">
           <div className="text-xl text-white">
-            <span className="font-bold">Solde du Wallet :</span> {walletBalance} ₿
+            <span className="font-bold">Wallet Balance:</span> {walletBalance} ₿
           </div>
         </div>
       </Card>
@@ -121,14 +94,14 @@ const UserProfile = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-8 rounded-xl w-96">
-            <h2 className="text-xl font-bold mb-4">Modifier ou Ajouter l'Image</h2>
+            <h2 className="text-xl font-bold mb-4">Modify or Add Image</h2>
             <div className="space-y-4">
               {!isCameraActive ? (
                 <button
                   className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg"
                   onClick={startCamera}
                 >
-                  Utiliser la caméra
+                  Use Camera
                 </button>
               ) : (
                 <div>
@@ -137,13 +110,13 @@ const UserProfile = () => {
                     className="w-full py-2 px-4 bg-green-500 text-white rounded-lg mt-4"
                     onClick={captureImage}
                   >
-                    Prendre une photo
+                    Take Photo
                   </button>
                   <button
                     className="w-full py-2 px-4 bg-red-500 text-white rounded-lg mt-2"
                     onClick={stopCamera}
                   >
-                    Arrêter la caméra
+                    Stop Camera
                   </button>
                 </div>
               )}
@@ -154,7 +127,7 @@ const UserProfile = () => {
                 className="w-full py-2 px-4 bg-gray-500 text-white rounded-lg"
                 onClick={() => setShowModal(false)}
               >
-                Annuler
+                Cancel
               </button>
             </div>
           </div>
