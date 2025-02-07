@@ -1,18 +1,51 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Card from "./common/Card";
 import Button from "./common/Button";
+import { histoTransaction,depot,retrait } from "../services/CryptoService";
 
-const Transactions = () => {
+interface TransactionsProps {
+  solde: number; 
+  idUtilisateur: number;
+}
+
+const Transactions: React.FC<TransactionsProps> = ({ solde,idUtilisateur }) => {
   const [activeTab, setActiveTab] = useState("deposit");
   const [amount, setAmount] = useState("");
   const [cryptoAmount, setCryptoAmount] = useState("");
   const [selectedCrypto, setSelectedCrypto] = useState("BTC");
-  const [walletBalance, setWalletBalance] = useState(0);
+  const [walletBalance, setWalletBalance] = useState<number>(solde); 
   const [transactionHistory, setTransactionHistory] = useState<
     { type: string; amount: number; date: string; crypto?: string }[] 
   >([]);
 
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  useEffect(() => {
+    setWalletBalance(solde);
+  }, [solde]);
+
+  useEffect(() => {
+    const fetchTransactionHistory = async () => {
+      try {
+        const history = await histoTransaction(idUtilisateur);
+        const formattedHistory = history.data.map((transaction: any) => ({
+          type: transaction.type === "DEPOT" ? "Deposit" : "Withdrawal",
+          amount: transaction.montant,
+          date: new Date(transaction.dateTransaction).toLocaleString(),
+        }));
+  
+        // Inverse l'ordre des transactions avant de les ajouter
+        setTransactionHistory((prevHistory) => [
+          ...formattedHistory.reverse(), // Inverser l'ordre
+          ...prevHistory,
+        ]);
+      } catch (error) {
+        console.error("Erreur lors de la récupération de l'historique des transactions:", error);
+      }
+    };
+  
+    fetchTransactionHistory();
+  }, [idUtilisateur]);
 
   const showNotification = (message: string, type: "success" | "error") => {
     setNotification({ message, type });
@@ -21,34 +54,48 @@ const Transactions = () => {
     }, 3000); // La notification disparaît après 3 secondes
   };
 
-  const handleDeposit = () => {
+  const handleDeposit = async () => {
     if (!amount || isNaN(Number(amount))) {
       showNotification("Veuillez saisir un montant valide.", "error");
       return;
     }
+
+
     const depositAmount = parseFloat(amount);
-    setWalletBalance(walletBalance + depositAmount);
-    setTransactionHistory((prevHistory) => [
-      { type: "Deposit", amount: depositAmount, date: new Date().toLocaleString() },
-      ...prevHistory, // Ajout de la nouvelle transaction en haut de l'historique
-    ]);
-    setAmount("");
-    showNotification("Dépôt réussi !", "success");
+    try {
+      // Appel de la fonction de dépôt
+      await depot(idUtilisateur, depositAmount);
+      setWalletBalance(walletBalance + depositAmount);
+      setTransactionHistory((prevHistory) => [
+        { type: "Deposit", amount: depositAmount, date: new Date().toLocaleString() },
+        ...prevHistory, // Ajout de la nouvelle transaction en haut de l'historique
+      ]);
+      setAmount("");
+      showNotification("Dépôt réussi !", "success");
+    } catch (error) {
+      showNotification("Erreur lors du dépôt.", "error");
+    }
   };
 
-  const handleWithdraw = () => {
+  const handleWithdraw = async () => {
     if (!amount || isNaN(Number(amount)) || parseFloat(amount) > walletBalance) {
       showNotification("Montant de retrait invalide ou solde insuffisant.", "error");
       return;
     }
     const withdrawAmount = parseFloat(amount);
-    setWalletBalance(walletBalance - withdrawAmount);
-    setTransactionHistory((prevHistory) => [
-      { type: "Withdrawal", amount: withdrawAmount, date: new Date().toLocaleString() },
-      ...prevHistory, // Ajout de la nouvelle transaction en haut de l'historique
-    ]);
-    setAmount("");
-    showNotification("Retrait réussi !", "success");
+    try {
+      // Appel de la fonction de retrait
+      await retrait(idUtilisateur, withdrawAmount);
+      setWalletBalance(walletBalance - withdrawAmount);
+      setTransactionHistory((prevHistory) => [
+        { type: "Withdrawal", amount: withdrawAmount, date: new Date().toLocaleString() },
+        ...prevHistory, 
+      ]);
+      setAmount("");
+      showNotification("Retrait réussi !", "success");
+    } catch (error) {
+      showNotification("Erreur lors du retrait.", "error");
+    }
   };
 
 return (

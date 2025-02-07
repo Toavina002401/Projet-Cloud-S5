@@ -4,11 +4,14 @@ import CryptoMultiLineChart from "@/components/CryptoMultiLineChart";
 import Navbar from "@/components/Navbar"; 
 import { useNavigate } from "react-router-dom";
 import Transactions from "@/components/Transactions";
+import { getPortefeuille } from "../services/CryptoService";
+
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<{ id: number; pseudo: string; email: string } | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [argent, setArgent] = useState<number>(0);
 
   useEffect(() => {
     // Récupérer les données utilisateur et token
@@ -18,6 +21,17 @@ const Dashboard = () => {
     if (storedUser && storedToken) {
       setUser(JSON.parse(storedUser));
       setToken(storedToken);
+
+      const userId = JSON.parse(storedUser).id;
+      getPortefeuille(userId)
+      .then((data) => {
+        if (data && data.data) {
+          setArgent(data.data.soldeFonds);
+        }
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération du portefeuille", error);
+      });
     } else {
       navigate("/");
     }
@@ -30,7 +44,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-12">
           {/* Section Transactions (5 colonnes sur écran moyen, 12 sur petit) */}
           <div className="lg:col-span-3 md:col-span-12  col-span-12 pt-5">
-            <Transactions />
+            <Transactions solde={argent} idUtilisateur={user ? user.id : undefined}/>
           </div>
 
           {/* Section Crypto (7 colonnes sur écran moyen, 12 sur petit) */}
