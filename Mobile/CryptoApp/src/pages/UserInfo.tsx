@@ -2,51 +2,107 @@ import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, Settings, Wallet, Bell, LogOut, X } from "lucide-react";
-import { AdvancedImage } from "@cloudinary/react";
-import { Cloudinary } from "@cloudinary/url-gen";
-import { auto } from "@cloudinary/url-gen/actions/resize";
-import { autoGravity } from "@cloudinary/url-gen/qualifiers/gravity";
-import Camera from "react-camera-pro"; // Assurez-vous que ce module est bien installé
+import { User, Settings, Wallet, Bell, LogOut, X, Loader2 } from "lucide-react";
+import { Camera, CameraResultType } from "@capacitor/camera";
+import { ToastAction } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/use-toast";
 
 const UserInfo = () => {
+  const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const cameraRef = useRef<any>(null); // Référence pour la caméra
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const cld = new Cloudinary({ cloud: { cloudName: 'dwalh5pwm' } });
+  const CLOUDINARY_UPLOAD_PRESET = "ml_default"; // Remplacez par votre upload preset
+  const CLOUDINARY_CLOUD_NAME = "dylzjym6n"; // Remplacez par votre cloud name
 
   const handleLogout = () => {
     console.log("Déconnecté");
     window.location.href = "/login";
   };
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
+  const handleImageError = () => {
+    toast({
+      variant: "destructive",
+      title: "Erreur de chargement",
+      description: "L'image de profil n'a pas pu être chargée",
+    });
+    setImageUrl(null);
   };
 
-  const captureImage = () => {
-    if (cameraRef.current) {
-      cameraRef.current.takePhoto().then((dataUri: string) => {
-        // Upload to Cloudinary
-        const formData = new FormData();
-        formData.append("file", dataUri);
-        formData.append("upload_preset", "ml_default"); // Assurez-vous de configurer un preset si nécessaire.
+  const uploadImage = async (base64Data: string) => {
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", base64Data);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+      formData.append("cloud_name", CLOUDINARY_CLOUD_NAME);
+      formData.append("folder", "user_profiles");
 
-        fetch(`https://api.cloudinary.com/v1_1/dwalh5pwm/image/upload`, {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
           method: "POST",
           body: formData,
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            setImageUrl(data.secure_url); // L'URL de l'image téléchargée
-            setIsCameraOpen(false); // Ferme la caméra
-          })
-          .catch((error) => {
-            console.error("Erreur lors de l'upload :", error);
-          });
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Échec de l'upload");
+      }
+
+      const data = await response.json();
+      setImageUrl(`${data.secure_url}?${Date.now()}`); // Cache busting
+      return data.secure_url;
+    } catch (error) {
+      console.error("Erreur d'upload:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur d'upload",
+        description: "Impossible de mettre à jour la photo de profil",
+        action: <ToastAction altText="Réessayer">Réessayer</ToastAction>,
       });
+    } finally {
+      setIsUploading(false);
+      setIsCameraOpen(false);
+    }
+  };
+
+  const captureImage = async () => {
+    try {
+      const photo = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: true,
+        resultType: CameraResultType.DataUrl,
+      });
+
+      if (photo.dataUrl) {
+        await uploadImage(photo.dataUrl);
+      }
+    } catch (error) {
+      console.error("Erreur de capture:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur de caméra",
+        description: "Impossible d'accéder à la caméra",
+      });
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = async () => {
+        if (typeof reader.result === "string") {
+          await uploadImage(reader.result);
+        }
+      };
+
+      reader.readAsDataURL(file);
     }
   };
 
@@ -54,20 +110,45 @@ const UserInfo = () => {
     setIsCameraOpen(true);
   };
 
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+
+
+
+
+
   return (
     <div className="min-h-screen bg-crypto-dark text-white p-4 animate-fadeIn">
       <div className="max-w-md mx-auto space-y-6">
-
         {/* Profile Header */}
         <Card className="bg-crypto-card border-none p-6 relative">
           <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20 cursor-pointer" onClick={toggleModal}>
-              {imageUrl ? (
-                <img src={imageUrl} alt="Profile" className="h-12 w-12 rounded-full" />
-              ) : (
-                <User className="h-12 w-12" />
+            <div className="relative group">
+              <Avatar
+                className="h-20 w-20 cursor-pointer rounded-full border-4 border-crypto-primary transition-transform duration-300 group-hover:scale-105"
+                onClick={toggleModal}
+              >
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt="Profile"
+                    className="h-full w-full rounded-full object-cover"
+                    onError={handleImageError}
+                  />
+                ) : (
+                  <div className="bg-crypto-primary/20 h-full w-full rounded-full flex items-center justify-center">
+                    <User className="h-8 w-8 text-crypto-primary" />
+                  </div>
+                )}
+              </Avatar>
+              {isUploading && (
+                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-white" />
+                </div>
               )}
-            </Avatar>
+            </div>
             <div>
               <h2 className="text-xl font-bold">John Doe</h2>
               <p className="text-crypto-primary">Premium Member</p>
@@ -75,51 +156,74 @@ const UserInfo = () => {
           </div>
         </Card>
 
-        {/* Modale pour la caméra */}
+        {/* Camera Modal */}
         {isCameraOpen && (
-          <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg w-72 relative">
+          <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-lg w-80 relative">
               <button
                 onClick={() => setIsCameraOpen(false)}
                 className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+                disabled={isUploading}
               >
                 <X className="h-5 w-5" />
               </button>
-              <Camera
-                ref={cameraRef} // Assurez-vous de passer une référence à la caméra
-                idealFacingMode="user"
-                isImageMirror={true}
-                isSilentMode={false}
-                imageType="image/jpeg"
-                imageCompression={0.8}
-                isMaxResolution={true}
-              />
-              <button onClick={captureImage} className="mt-4 p-2 bg-blue-500 text-white rounded">
-                Prendre une photo
-              </button>
+              
+              <div className="mt-4 space-y-4">
+                <Button
+                  onClick={captureImage}
+                  className="w-full"
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Prendre une photo"
+                  )}
+                </Button>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  Choisir depuis la galerie
+                </Button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Quick Actions */}
+        {/* Actions rapides */}
         <div className="grid grid-cols-2 gap-4">
+          {/* Bouton pour ouvrir la caméra */}
+          {!isCameraOpen && (
+            <Button
+              onClick={handleCapture}
+              variant="outline"
+              className="w-full bg-crypto-card border-none hover:bg-crypto-primary/20 flex justify-center items-center"
+            >
+              Ouvrir la caméra
+            </Button>
+          )}
           <Button
             variant="outline"
-            className="bg-crypto-card border-none hover:bg-crypto-primary/20"
-          >
-            <Settings className="mr-2" />
-            Settings
-          </Button>
-          <Button
-            variant="outline"
-            className="bg-crypto-card border-none hover:bg-crypto-primary/20"
+            className="w-full bg-crypto-card border-none hover:bg-crypto-primary/20 flex justify-center items-center"
           >
             <Bell className="mr-2" />
             Notifications
           </Button>
         </div>
 
-        {/* Account Details */}
+        {/* Détails du compte */}
         <Card className="bg-crypto-card border-none p-6 space-y-4">
           <h3 className="text-lg font-semibold">Account Details</h3>
           <div className="space-y-2">
@@ -138,7 +242,7 @@ const UserInfo = () => {
           </div>
         </Card>
 
-        {/* Portfolio Summary */}
+        {/* Résumé du portfolio */}
         <Card className="bg-crypto-card border-none p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Portfolio Value</h3>
@@ -158,17 +262,6 @@ const UserInfo = () => {
             Se déconnecter
           </Button>
         </div>
-
-        {/* Capture Photo Button */}
-        {!isCameraOpen && (
-          <Button
-            onClick={handleCapture}
-            variant="outline"
-            className="w-full bg-crypto-primary text-white border-none hover:bg-crypto-primary/90 transition mt-4"
-          >
-            Ouvrir la caméra
-          </Button>
-        )}
       </div>
     </div>
   );
