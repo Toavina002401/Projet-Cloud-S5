@@ -5,9 +5,6 @@ import { Input } from "./ui/input";
 import { toast } from "./ui/use-toast";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
-import { requestNotificationPermission } from "../config/firebase"; // Fonction pour gérer les notifications
-import { onMessage } from "firebase/messaging";
-import { messaging } from "../config/firebase";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -34,23 +31,6 @@ const Login = () => {
 
       const token = await user.getIdToken();
       localStorage.setItem("firebaseToken", token);
-
-      // Demander l'autorisation de notification
-      const fcmToken = await requestNotificationPermission();
-      if (fcmToken) {
-        console.log("Notifications activées avec le token :", fcmToken);
-
-        // Écouter les notifications en premier plan
-        onMessage(messaging, (payload) => {
-          console.log("Notification reçue :", payload);
-          toast({
-            title: payload.notification?.title || "Notification",
-            description: payload.notification?.body || "You have a new message.",
-          });
-        });
-      } else {
-        console.log("Notifications désactivées ou refusées par l'utilisateur.");
-      }
 
       navigate("/home");
     } catch (error: any) {
