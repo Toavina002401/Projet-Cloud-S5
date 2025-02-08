@@ -4,7 +4,10 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { toast } from "./ui/use-toast";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config/firebase"; // assuming you've set up firebase.js or firebase.ts
+import { auth } from "../config/firebase";
+import { requestNotificationPermission } from "../config/firebase"; // Fonction pour gérer les notifications
+import { onMessage } from "firebase/messaging";
+import { messaging } from "../config/firebase";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -28,10 +31,26 @@ const Login = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      
-      // Store the token if needed (for session management)
+
       const token = await user.getIdToken();
-      localStorage.setItem('firebaseToken', token);
+      localStorage.setItem("firebaseToken", token);
+
+      // Demander l'autorisation de notification
+      const fcmToken = await requestNotificationPermission();
+      if (fcmToken) {
+        console.log("Notifications activées avec le token :", fcmToken);
+
+        // Écouter les notifications en premier plan
+        onMessage(messaging, (payload) => {
+          console.log("Notification reçue :", payload);
+          toast({
+            title: payload.notification?.title || "Notification",
+            description: payload.notification?.body || "You have a new message.",
+          });
+        });
+      } else {
+        console.log("Notifications désactivées ou refusées par l'utilisateur.");
+      }
 
       navigate("/home");
     } catch (error: any) {
@@ -79,12 +98,8 @@ const Login = () => {
               />
             </svg>
           </div>
-          <h2 className="text-3xl font-bold text-crypto-light mb-2">
-            Welcome Back
-          </h2>
-          <p className="text-crypto-light/60">
-            Enter your credentials to access your account
-          </p>
+          <h2 className="text-3xl font-bold text-crypto-light mb-2">Welcome Back</h2>
+          <p className="text-crypto-light/60">Enter your credentials to access your account</p>
         </div>
 
         <form onSubmit={handleLogin} className="mt-8 space-y-6">

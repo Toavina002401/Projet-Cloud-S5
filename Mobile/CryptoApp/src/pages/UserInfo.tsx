@@ -1,9 +1,7 @@
 import { useState, useRef } from "react";
-import { signOut } from 'firebase/auth';
-import { auth } from '../config/firebase';  // Assurez-vous que le chemin vers votre configuration Firebase est correct.
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../auth/AuthProvider"
-
+import { signOut } from "firebase/auth";
+import { auth } from "../config/firebase"; // Assurez-vous que le chemin vers votre configuration Firebase est correct.
+import { useAuth } from "../auth/AuthProvider";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,14 +9,13 @@ import { User, Settings, Wallet, Bell, LogOut, X, Loader2 } from "lucide-react";
 import { Camera, CameraResultType } from "@capacitor/camera";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 const UserInfo = () => {
-
-  const { user } = useAuth();  // Récupère l'utilisateur connecté 
+  const { user } = useAuth();
   const email = user ? user.email : "Not logged in";
-  const memberSince = user ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/A"; // Date de création du compte
+  const memberSince = user ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/A";
   const status = user ? "Active" : "Inactive";
-
 
   const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,100 +24,115 @@ const UserInfo = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const CLOUDINARY_UPLOAD_PRESET = "ml_default"; // Remplacez par votre upload preset
-  const CLOUDINARY_CLOUD_NAME = "dylzjym6n"; // Remplacez par votre cloud name
+  const IMAGEKIT_PUBLIC_KEY = "public_iGIERvQIqHyYfr1AUkbPC10ByM0=";
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      localStorage.removeItem('firebaseToken');
+      localStorage.removeItem("firebaseToken");
       console.log("Déconnecté");
-      window.location.href = "/login";  // Utilisez window.location.href ou la méthode navigate si vous souhaitez utiliser react-router
+      window.location.href = "/login";
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     }
   };
 
-  const handleImageError = () => {
-    toast({
-      variant: "destructive",
-      title: "Erreur de chargement",
-      description: "L'image de profil n'a pas pu être chargée",
-    });
-    setImageUrl(null);
+
+  const fetchSignature = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/generate-signature");
+      if (!response.ok) throw new Error("Erreur lors de la récupération de la signature");
+
+      const { signature, timestamp, expire } = await response.json();
+      return { signature, timestamp, expire };
+    } catch (error) {
+      console.error("Erreur de signature :", error);
+      throw error;
+    }
   };
 
-  const uploadImage = async (base64Data: string) => {
-    setIsUploading(true);
+
+  const uploadImage = async (file: File | Blob) => {
     try {
+      const { signature, timestamp, expire } = await fetchSignature();
+  
       const formData = new FormData();
-      formData.append("file", base64Data);
-      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-      formData.append("cloud_name", CLOUDINARY_CLOUD_NAME);
-      formData.append("folder", "user_profiles");
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
+      formData.append("file", file);
+      formData.append("fileName", file instanceof File ? file.name : "captured_image.jpg");
+      formData.append("publicKey", IMAGEKIT_PUBLIC_KEY);
+      formData.append("signature", signature);
+      formData.append("expire", expire);
+      formData.append("timestamp", timestamp);
+  
+      setIsUploading(true);
+  
+      const response = await fetch("http://localhost:3000/upload-proxy", {
+        method: "POST",
+        body: formData,
+      });
+  
       if (!response.ok) {
-        throw new Error("Échec de l'upload");
+        const error = await response.json();
+        throw new Error(error.error || "Erreur inconnue");
       }
-
+  
       const data = await response.json();
-      setImageUrl(`${data.secure_url}?${Date.now()}`); // Cache busting
-      return data.secure_url;
+      console.log("Upload réussi :", data);
+      setImageUrl(data.url || null);
+  
+      toast({
+        title: "Upload réussi",
+        description: "L'image a été uploadée avec succès.",
+      });
     } catch (error) {
-      console.error("Erreur d'upload:", error);
+      console.error("Erreur d'upload :", error);
       toast({
         variant: "destructive",
         title: "Erreur d'upload",
-        description: "Impossible de mettre à jour la photo de profil",
-        action: <ToastAction altText="Réessayer">Réessayer</ToastAction>,
+        description: "Une erreur s'est produite lors du téléchargement de l'image.",
       });
     } finally {
       setIsUploading(false);
-      setIsCameraOpen(false);
     }
   };
+  
+  
+  
+
+  
+
 
   const captureImage = async () => {
     try {
       const photo = await Camera.getPhoto({
         quality: 90,
         allowEditing: true,
-        resultType: CameraResultType.DataUrl,
+        resultType: CameraResultType.Uri,
       });
-
-      if (photo.dataUrl) {
-        await uploadImage(photo.dataUrl);
+  
+      if (photo.webPath) {
+        const response = await fetch(photo.webPath);
+        const blob = await response.blob();
+        await uploadImage(blob);
       }
-    } catch (error) {
-      console.error("Erreur de capture:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur de caméra",
-        description: "Impossible d'accéder à la caméra",
-      });
+    } catch (error: any) {
+      if (error.message === "User cancelled photos app") {
+        console.log("L'utilisateur a annulé la capture.");
+      } else {
+        console.error("Erreur de capture:", error);
+        toast({
+          variant: "destructive",
+          title: "Erreur de caméra",
+          description: "Impossible d'accéder à la caméra.",
+        });
+      }
     }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
-      const reader = new FileReader();
-
-      reader.onloadend = async () => {
-        if (typeof reader.result === "string") {
-          await uploadImage(reader.result);
-        }
-      };
-
-      reader.readAsDataURL(file);
+      await uploadImage(file);
     }
   };
 
@@ -132,6 +144,14 @@ const UserInfo = () => {
     setIsModalOpen(!isModalOpen);
   };
 
+  const handleImageError = () => {
+    toast({
+      variant: "destructive",
+      title: "Erreur de chargement",
+      description: "L'image de profil n'a pas pu être chargée.",
+    });
+    setImageUrl(null);
+  };
 
 
 
