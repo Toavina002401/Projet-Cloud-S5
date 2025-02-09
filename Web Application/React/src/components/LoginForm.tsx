@@ -84,7 +84,7 @@ const LoginForm = () => {
               </p>
             </div>
             <div className="flex justify-center">
-              <div id="loading-animation" style={{ width: 100, height: 100 }}></div>
+              <div id="loading-animation" style={{ width: 150, height: 150 }}></div>
             </div>
             <p className="text-center mt-6 text-sm text-muted-foreground">
               IT Université Andoharanofotsy
