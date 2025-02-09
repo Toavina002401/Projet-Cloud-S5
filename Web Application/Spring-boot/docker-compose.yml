@@ -11,9 +11,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://container_db:5432/ProjetCloudS5
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Belouh
-    networks:
-      - docker_default
+    # networks:
+    #   - my_network
 
-networks:
-  docker_default:
-    external: true
+# networks:
+#   my_network:
+#     driver: bridge
