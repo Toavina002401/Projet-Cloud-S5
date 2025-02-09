@@ -12,6 +12,12 @@ const Dashboard = () => {
   const [token, setToken] = useState<string | null>(null);
   const [argent, setArgent] = useState<number>(0);
   const [porteFeuille ,setPorteFeuille] = useState<number>(0);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Fonction pour déclencher le rafraîchissement
+  const handleTransactionSuccess = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   useEffect(() => {
     // Récupérer les données utilisateur et token
@@ -45,7 +51,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-12">
           {/* Section Transactions (5 colonnes sur écran moyen, 12 sur petit) */}
           <div className="lg:col-span-3 md:col-span-12  col-span-12 pt-5">
-            <Transactions solde={argent} idUtilisateur={user ? user.id : undefined}/>
+            <Transactions solde={argent} idUtilisateur={user ? user.id : undefined}  refreshTrigger={refreshTrigger} />
           </div>
 
           {/* Section Crypto (7 colonnes sur écran moyen, 12 sur petit) */}
@@ -56,7 +62,7 @@ const Dashboard = () => {
 
             {/* CryptoChart Section */}
             <div className="space-y-6">
-              <CryptoFavoris idUtilisateur={user ? user.id : undefined} idPortefeuille={porteFeuille}/>
+              <CryptoFavoris idUtilisateur={user ? user.id : undefined} idPortefeuille={porteFeuille} onTransactionSuccess={handleTransactionSuccess} />
             </div>
           </div>
         </div>

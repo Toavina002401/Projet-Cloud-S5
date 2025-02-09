@@ -6,9 +6,10 @@ import { histoTransaction,depot,retrait,getAlltransactionCryptoById } from "../s
 interface TransactionsProps {
   solde: number; 
   idUtilisateur: number;
+  refreshTrigger?: number;
 }
 
-const Transactions: React.FC<TransactionsProps> = ({ solde,idUtilisateur }) => {
+const Transactions: React.FC<TransactionsProps> = ({ solde,idUtilisateur,refreshTrigger }) => {
   const [activeTab, setActiveTab] = useState("deposit");
   const [amount, setAmount] = useState("");
   const [cryptoAmount, setCryptoAmount] = useState("");
@@ -61,7 +62,7 @@ const Transactions: React.FC<TransactionsProps> = ({ solde,idUtilisateur }) => {
     };
   
     fetchTransactionHistory();
-  }, [idUtilisateur]);
+  }, [idUtilisateur, refreshTrigger]);
 
   const showNotification = (message: string, type: "success" | "error") => {
     setNotification({ message, type });

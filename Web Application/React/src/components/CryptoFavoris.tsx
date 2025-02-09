@@ -84,9 +84,10 @@ const generateCryptoData = (previousData = []) => {
 interface CryptoFavoritProps { 
   idUtilisateur: number;
   idPortefeuille: number;
+  onTransactionSuccess?: () => void; 
 }
 
-const CryptoFavorit: React.FC<CryptoFavoritProps> = ({ idUtilisateur,idPortefeuille }) => {
+const CryptoFavorit: React.FC<CryptoFavoritProps> = ({ idUtilisateur,idPortefeuille,onTransactionSuccess  }) => {
   const [selectedCrypto, setSelectedCrypto] = useState("BTC");
   const [cryptoData, setCryptoData] = useState(generateCryptoData());
   const [cryptoHistory, setCryptoHistory] = useState<Record<string, { time: string, value: number }[]>>({});
@@ -181,7 +182,7 @@ const CryptoFavorit: React.FC<CryptoFavoritProps> = ({ idUtilisateur,idPortefeui
             timer: 3500,
             showConfirmButton: false,
           });
-          
+          if (onTransactionSuccess) onTransactionSuccess();
         }
       } catch (error) {
         Swal.fire({
@@ -223,6 +224,7 @@ const CryptoFavorit: React.FC<CryptoFavoritProps> = ({ idUtilisateur,idPortefeui
             timer: 3500,
             showConfirmButton: false,
           });
+          if (onTransactionSuccess) onTransactionSuccess();
         }
       } catch (error) {
         Swal.fire({
@@ -249,7 +251,7 @@ const CryptoFavorit: React.FC<CryptoFavoritProps> = ({ idUtilisateur,idPortefeui
         Swal.fire({
           title: "Stock disponible",
           text: `Vous disposez de ${stockActuelle.data.stock} unités de ${selectedCryptoData?.name} dans votre stock.`,
-          icon: "success",
+          icon: "info",
         });
       }
     } catch (error) {
