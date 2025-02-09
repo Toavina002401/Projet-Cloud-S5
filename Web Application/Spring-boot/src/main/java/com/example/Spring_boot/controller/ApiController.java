@@ -4,12 +4,14 @@ import com.example.Spring_boot.modules.Cryptomonnaies;
 import com.example.Spring_boot.modules.HistoriqueFonds;
 import com.example.Spring_boot.modules.Portefeuille;
 import com.example.Spring_boot.modules.SoldeCrypto;
+import com.example.Spring_boot.modules.StockCrypto;
 import com.example.Spring_boot.modules.TransactionCryptoRequest;
 import com.example.Spring_boot.modules.TransactionRequest;
 import com.example.Spring_boot.modules.Utilisateur;
 import com.example.Spring_boot.repository.CryptomonnaiesRepository;
 import com.example.Spring_boot.repository.HistoriqueFondsRepository;
 import com.example.Spring_boot.repository.PortefeuilleRepository;
+import com.example.Spring_boot.repository.SoldeCryptoRepository;
 import com.example.Spring_boot.repository.UtilisateurRepository;
 import com.example.Spring_boot.services.HistoriqueFondsService;
 import com.example.Spring_boot.services.PortefeuilleService;
@@ -56,12 +58,29 @@ public class ApiController {
     private SoldeCryptoService soldeCryptoService;
 
     @Autowired
+    private SoldeCryptoRepository soldeCryptoRepository;
+
+    @Autowired
     private ResponseHelper responseHelper;
 
     @GetMapping("/api/portefeuille/{idUtilisateur}")
     public ResponseEntity<?> getPortefeuille(@PathVariable Long idUtilisateur) {
         try {
             Portefeuille portefeuille = portefeuilleService.getPortefeuille(idUtilisateur);
+            if (portefeuille == null) {
+                Optional<Utilisateur> uti = utilisateurRepository.findById(idUtilisateur);
+                
+                if (!uti.isPresent()) {
+                    return responseHelper.jsonResponse("error", null, "Utilisateur non trouvé", null);
+                }
+
+                portefeuille = new Portefeuille();
+                portefeuille.setSoldeFonds(0.00);
+                portefeuille.setDateCreation(new Timestamp(System.currentTimeMillis()));
+                portefeuille.setUtilisateur(uti.get());
+                portefeuille = portefeuilleRepository.save(portefeuille);
+            }
+
             return responseHelper.jsonResponse("success", portefeuille, null, null);
         } catch (Exception e) {
             return responseHelper.jsonResponse("error", null, e.getMessage(), null);
@@ -159,6 +178,52 @@ public class ApiController {
         }
     }
 
+    @GetMapping("/api/getStock/{idUtilisateur}/{idCrypto}")
+    public ResponseEntity<?> getStock(@PathVariable Long idUtilisateur,@PathVariable Long idCrypto) {
+        try {
+            Cryptomonnaies crypto = cryptomonnaiesRepository.findById(idCrypto).orElseThrow(() -> new RuntimeException("Cryptomonnaies non trouvé"));
+            Portefeuille portefeuille = portefeuilleService.getPortefeuille(idUtilisateur);
+
+            if (portefeuille == null) {
+                Optional<Utilisateur> uti = utilisateurRepository.findById(idUtilisateur);
+                
+                if (!uti.isPresent()) {
+                    return responseHelper.jsonResponse("error", null, "Utilisateur non trouvé", null);
+                }
+
+                portefeuille = new Portefeuille();
+                portefeuille.setSoldeFonds(0.00);
+                portefeuille.setDateCreation(new Timestamp(System.currentTimeMillis()));
+                portefeuille.setUtilisateur(uti.get());
+                portefeuille = portefeuilleRepository.save(portefeuille);
+            }
+
+            BigDecimal quantAcheter = soldeCryptoRepository.getQuantite(idCrypto, portefeuille.getId(), "ACHETER").orElse(BigDecimal.ZERO);
+            BigDecimal quantVendue = soldeCryptoRepository.getQuantite(idCrypto, portefeuille.getId(), "VENDRE").orElse(BigDecimal.ZERO);
+            BigDecimal stock = quantAcheter.subtract(quantVendue);
+            double stockDouble = stock.doubleValue(); 
+
+            StockCrypto valiny = new StockCrypto();
+            valiny.setId(idCrypto);
+            valiny.setNom(crypto.getNom());
+            valiny.setStock(stockDouble);
+            return responseHelper.jsonResponse("success", valiny, null, null);
+        } catch (Exception e) {
+            return responseHelper.jsonResponse("error", null, e.getMessage(), null);
+        }
+    }
+
+    @GetMapping("/api/transactionCrypto/{idUtilisateur}")
+    public ResponseEntity<?> getAlltransactionCryptoById(@PathVariable Long idUtilisateur) {
+        try {
+            Portefeuille portefeuille = portefeuilleService.getPortefeuille(idUtilisateur);
+            List<SoldeCrypto> soldeCryptoList = soldeCryptoRepository.findByPortefeuilleId(portefeuille.getId());
+            return responseHelper.jsonResponse("success", soldeCryptoList, null, null);
+        } catch (Exception e) {
+            return responseHelper.jsonResponse("error", null, e.getMessage(), null);
+        }
+    }
+
     @PostMapping("/api/transactionCrypto")
     public ResponseEntity<?> transactionCrypto(@RequestBody TransactionCryptoRequest trans) {
         try {
@@ -174,8 +239,32 @@ public class ApiController {
             soldeCrypto.setCryptomonnaies(crypto);
             soldeCrypto.setPortefeuille(portefeuille);
 
-            SoldeCrypto sol = soldeCryptoService.saveSoldeCrypto(soldeCrypto);
-            return responseHelper.jsonResponse("success", sol, null, null);
+            double prixCrypQuant = soldeCrypto.getQuantiteCrypto().doubleValue() * soldeCrypto.getPrixCrypto().doubleValue();
+
+            if (soldeCrypto.getType().equals("ACHETER")) {
+                if (prixCrypQuant <= portefeuille.getSoldeFonds()) {
+                    portefeuille.setSoldeFonds(portefeuille.getSoldeFonds() - prixCrypQuant);
+                    portefeuilleRepository.save(portefeuille);
+                    SoldeCrypto sol = soldeCryptoService.saveSoldeCrypto(soldeCrypto);
+                    return responseHelper.jsonResponse("success", sol, null, null);
+                }else{
+                    throw new Exception("Le solde de votre portefeuille est insuffisant pour couvrir ce montant "+ prixCrypQuant);
+                }
+            }else{
+                BigDecimal quantAcheter = soldeCryptoRepository.getQuantite(trans.getIdCrypto(), portefeuille.getId(), "ACHETER").orElse(BigDecimal.ZERO);
+                BigDecimal quantVendue = soldeCryptoRepository.getQuantite(trans.getIdCrypto(), portefeuille.getId(), "VENDRE").orElse(BigDecimal.ZERO);
+                BigDecimal stock = quantAcheter.subtract(quantVendue);
+                double stockdouble = stock.doubleValue(); 
+
+                if (stockdouble >= soldeCrypto.getQuantiteCrypto().doubleValue()) {
+                    portefeuille.setSoldeFonds(portefeuille.getSoldeFonds() + prixCrypQuant);
+                    portefeuilleRepository.save(portefeuille);
+                    SoldeCrypto sol = soldeCryptoService.saveSoldeCrypto(soldeCrypto);
+                    return responseHelper.jsonResponse("success", sol, null, null); 
+                }else{
+                    throw new Exception("Stock insuffisant : vous disposez de "+ stockdouble +" unités de cette crypto.");
+                }
+            }
         } catch (Exception e) {
             return responseHelper.jsonResponse("error", null, e.getMessage(), null);
         }

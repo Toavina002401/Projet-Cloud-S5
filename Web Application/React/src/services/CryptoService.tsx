@@ -22,6 +22,7 @@ export const getAllCrypto = async () => {
           name: crypto.nom,
           symbol: crypto.symbole,
           basePrice: parseFloat(crypto.baseprise).toFixed(2),
+          images: crypto.images,
         }))
       : [];  // Retourne un tableau vide si les données ne sont pas sous forme de tableau
     return cryptos;
@@ -41,6 +42,36 @@ export const histoTransaction = async (idUtilisateur) => {
   }
 };
 
+export const getAlltransactionCryptoById = async (idUtilisateur) => {
+  try {
+    const response = await axios.get(`${API_CRYPTO}/transactionCrypto/${idUtilisateur}`);
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des historiques de transactions pour les achats et ventes de crypto:", error);
+    throw error;
+  }
+};
+
+export const transactionCrypto = async (quantiteCrypto: number, prixCrypto: number, type: string, idCrypto: number,idPorteFeuille: number) => {
+  try {
+    const response = await axios.post(`${API_CRYPTO}/transactionCrypto`, { quantiteCrypto, prixCrypto,type,idCrypto, idPorteFeuille});
+    return response.data;
+  } catch (error) {
+    console.error("Erreur de transaction de crypto dans le service", error);
+    throw error;
+  }
+};
+
+export const getStock = async (idUtilisateur,idCrypto) => {
+  try {
+    const response = await axios.get(`${API_CRYPTO}/getStock/${idUtilisateur}/${idCrypto}`);
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération du stock de crypto:", error);
+    throw error;
+  }
+};
+
 export const depot = async (idUtilisateur: number, solde: number) => {
   try {
     const response = await axios.post(`${API_CRYPTO}/depot`, { idUtilisateur, solde });
@@ -50,7 +81,6 @@ export const depot = async (idUtilisateur: number, solde: number) => {
     throw error;
   }
 };
-
 
 export const retrait = async (idUtilisateur: number, solde: number) => {
   try {

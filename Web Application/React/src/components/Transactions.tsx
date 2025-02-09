@@ -1,7 +1,7 @@
 import { useState,useEffect } from "react";
 import Card from "./common/Card";
 import Button from "./common/Button";
-import { histoTransaction,depot,retrait } from "../services/CryptoService";
+import { histoTransaction,depot,retrait,getAlltransactionCryptoById } from "../services/CryptoService";
 
 interface TransactionsProps {
   solde: number; 
@@ -15,7 +15,7 @@ const Transactions: React.FC<TransactionsProps> = ({ solde,idUtilisateur }) => {
   const [selectedCrypto, setSelectedCrypto] = useState("BTC");
   const [walletBalance, setWalletBalance] = useState<number>(solde); 
   const [transactionHistory, setTransactionHistory] = useState<
-    { type: string; amount: number; date: string; crypto?: string }[] 
+    { type: string; amount: number; date: string; crypto?: string ; aff?:string}[] 
   >([]);
 
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -29,16 +29,32 @@ const Transactions: React.FC<TransactionsProps> = ({ solde,idUtilisateur }) => {
       try {
         const history = await histoTransaction(idUtilisateur);
         const formattedHistory = history.data.map((transaction: any) => ({
-          type: transaction.type === "DEPOT" ? "Deposit" : "Withdrawal",
+          type: transaction.type === "DEPOT" ? "Dépôt" : "Retrait",
           amount: transaction.montant,
           date: new Date(transaction.dateTransaction).toLocaleString(),
         }));
   
-        // Inverse l'ordre des transactions avant de les ajouter
-        setTransactionHistory((prevHistory) => [
-          ...formattedHistory.reverse(), // Inverser l'ordre
-          ...prevHistory,
-        ]);
+        const cryptoHistoryResponse = await getAlltransactionCryptoById(idUtilisateur);
+        if (cryptoHistoryResponse.status === "success") {
+          const formattedCryptoHistory = cryptoHistoryResponse.data.map((transaction: any) => ({
+            type: transaction.cryptomonnaies.nom + " ($"+transaction.prixCrypto +") ",
+            amount: transaction.prixCrypto * transaction.quantiteCrypto,
+            date: new Date(transaction.dernierMaj).toLocaleString(),
+            crypto: `${transaction.cryptomonnaies.symbole} (${transaction.quantiteCrypto})`,
+            aff: transaction.type,
+          }));
+
+          setTransactionHistory((prevHistory) => [
+            ...formattedCryptoHistory.reverse(),
+            ...formattedHistory.reverse(),
+            ...prevHistory,
+          ]);
+        }else{
+          setTransactionHistory((prevHistory) => [
+            ...formattedHistory.reverse(), // Inverser l'ordre
+            ...prevHistory,
+          ]);
+        }
       } catch (error) {
         console.error("Erreur lors de la récupération de l'historique des transactions:", error);
       }
@@ -67,7 +83,7 @@ const Transactions: React.FC<TransactionsProps> = ({ solde,idUtilisateur }) => {
       await depot(idUtilisateur, depositAmount);
       setWalletBalance(walletBalance + depositAmount);
       setTransactionHistory((prevHistory) => [
-        { type: "Deposit", amount: depositAmount, date: new Date().toLocaleString() },
+        { type: "Dépôt", amount: depositAmount, date: new Date().toLocaleString() },
         ...prevHistory, // Ajout de la nouvelle transaction en haut de l'historique
       ]);
       setAmount("");
@@ -88,7 +104,7 @@ const Transactions: React.FC<TransactionsProps> = ({ solde,idUtilisateur }) => {
       await retrait(idUtilisateur, withdrawAmount);
       setWalletBalance(walletBalance - withdrawAmount);
       setTransactionHistory((prevHistory) => [
-        { type: "Withdrawal", amount: withdrawAmount, date: new Date().toLocaleString() },
+        { type: "Retrait", amount: withdrawAmount, date: new Date().toLocaleString() },
         ...prevHistory, 
       ]);
       setAmount("");
@@ -151,42 +167,42 @@ return (
             )}
           </div>
 
-{/* Transaction History Section */}
-<div className="mt-6">
-  <h3 className="text-xl font-bold mb-4">Historique des transactions</h3>
-  <div className="space-y-2 max-h-96 overflow-y-auto">
-    {transactionHistory.map((transaction, index) => (
-      <div
-        key={index}
-        className="p-4 rounded-lg bg-crypto-card border border-white/10 flex flex-col md:flex-row justify-between items-center"
-      >
-        <div>
-          <p className="font-medium">{transaction.type}</p>
-          <p className="text-sm text-muted-foreground">
-            {transaction.date}
-          </p>
-          {transaction.crypto && (
-            <p className="text-sm text-muted-foreground">
-              Crypto: {transaction.crypto}
-            </p>
-          )}
-        </div>
-        <p
-          className={`text-lg font-bold ${
-            transaction.type === "Deposit" || transaction.type === "Crypto Sale"
-              ? "text-green-500"
-              : "text-red-500"
-          }`}
-        >
-          {transaction.type === "Deposit" || transaction.type === "Crypto Sale"
-            ? "+"
-            : "-"}
-          ${transaction.amount.toFixed(2)}
-        </p>
-      </div>
-    ))}
-  </div>
-</div>
+          {/* Transaction History Section */}
+          <div className="mt-6">
+            <h3 className="text-xl font-bold mb-4">Historique des transactions</h3>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {transactionHistory.map((transaction, index) => (
+                <div
+                  key={index}
+                  className="p-4 rounded-lg bg-crypto-card border border-white/10 flex flex-col md:flex-row justify-between items-center"
+                >
+                  <div>
+                    <p className="font-medium">{transaction.type}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {transaction.date}
+                    </p>
+                    {transaction.crypto && (
+                      <p className="text-sm text-muted-foreground">
+                        Crypto: {transaction.crypto}
+                      </p>
+                    )}
+                  </div>
+                  <p
+                    className={`text-lg font-bold ${
+                      transaction.type === "Dépôt" || transaction.aff === "VENDRE"
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {transaction.type === "Dépôt" || transaction.aff === "VENDRE"
+                      ? "+"
+                      : "-"}
+                    ${transaction.amount.toFixed(2)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
 
 
 

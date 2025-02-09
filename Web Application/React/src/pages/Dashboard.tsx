@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [user, setUser] = useState<{ id: number; pseudo: string; email: string } | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [argent, setArgent] = useState<number>(0);
+  const [porteFeuille ,setPorteFeuille] = useState<number>(0);
 
   useEffect(() => {
     // Récupérer les données utilisateur et token
@@ -26,6 +27,7 @@ const Dashboard = () => {
       .then((data) => {
         if (data && data.data) {
           setArgent(data.data.soldeFonds);
+          setPorteFeuille(data.data.id);
         }
       })
       .catch((error) => {
@@ -54,7 +56,7 @@ const Dashboard = () => {
 
             {/* CryptoChart Section */}
             <div className="space-y-6">
-              <CryptoFavoris />
+              <CryptoFavoris idUtilisateur={user ? user.id : undefined} idPortefeuille={porteFeuille}/>
             </div>
           </div>
         </div>
