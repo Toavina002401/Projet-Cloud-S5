@@ -30,7 +30,8 @@ const Login = () => {
       const user = userCredential.user;
 
       const token = await user.getIdToken();
-      localStorage.setItem("firebaseToken", token);
+      const idUser = await user.uid;
+      sessionStorage.setItem("firebaseUser", JSON.stringify({ token, idUser }));
 
       navigate("/home");
     } catch (error: any) {

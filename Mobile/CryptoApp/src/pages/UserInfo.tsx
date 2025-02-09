@@ -9,12 +9,15 @@ import { User, Settings, Wallet, Bell, LogOut, X, Loader2 } from "lucide-react";
 import { Camera, CameraResultType } from "@capacitor/camera";
 import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
+import { doc, setDoc, getFirestore } from "firebase/firestore";
 
 const UserInfo = () => {
   const { user } = useAuth();
   const email = user ? user.email : "Not logged in";
   const memberSince = user ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/A";
   const status = user ? "Active" : "Inactive";
+  // Initialiser Firestore
+  const db = getFirestore();
 
   const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -69,6 +72,15 @@ const uploadImage = async (file: File | Blob) => {
     console.log("Upload succeeded:", data);
     setImageUrl(data.secure_url); // Mettre à jour l'URL de l'image pour l'affichage dans l'Avatar
 
+     // Enregistrer l'URL de l'image dans Firestore
+     const user = JSON.parse(sessionStorage.getItem("firebaseUser") || "{}");
+     if (user.idUser) {
+       await setDoc(doc(db, "userProfiles", user.idUser), {
+         profileImageUrl: data.secure_url,
+       }, { merge: true }); // Utilisez { merge: true } pour ne pas écraser d'autres champs existants
+     }
+
+     
     toast({
       title: "Upload réussi",
       description: "L'image a été uploadée avec succès.",
