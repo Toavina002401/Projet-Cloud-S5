@@ -47,42 +47,45 @@ const UserInfo = () => {
     }
   };
 
-  // Fonction pour télécharger une image via un fichier sélectionné
-  const uploadImage = async (file: File | Blob) => {
-    try {
-      console.log("Uploading file:", file);
+// Fonction pour télécharger une image via un fichier sélectionné
+const uploadImage = async (file: File | Blob) => {
+  try {
+    console.log("Uploading file:", file);
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("fileName", file instanceof File ? file.name : "image.jpg");
+    // Créer un FormData pour l'upload
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "crypto "); // Remplace par ton upload preset
 
-      setIsUploading(true);
+    setIsUploading(true);
 
-      const response = await axios.post("http://localhost:3000/upload-image", formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    // Faire une requête POST vers Cloudinary
+    const response = await axios.post(
+      "https://api.cloudinary.com/v1_1/dvs2vzinl/image/upload", // Remplace "dvs2vzinl" par ton Cloud Name
+      formData
+    );
 
-      const data = response.data;
-      console.log("Upload succeeded:", data);
-      setImageUrl(data.imageUrl); // Afficher l'URL de l'image téléchargée
+    const data = response.data;
+    console.log("Upload succeeded:", data);
+    setImageUrl(data.secure_url); // Mettre à jour l'URL de l'image pour l'affichage dans l'Avatar
 
-      toast({
-        title: "Upload réussi",
-        description: "L'image a été uploadée avec succès.",
-      });
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur d'upload",
-        description: "Une erreur s'est produite lors du téléchargement de l'image.",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
+    toast({
+      title: "Upload réussi",
+      description: "L'image a été uploadée avec succès.",
+    });
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    toast({
+      variant: "destructive",
+      title: "Erreur d'upload",
+      description: "Une erreur s'est produite lors du téléchargement de l'image.",
+    });
+  } finally {
+    setIsUploading(false);
+  }
+};
+ 
+
 
   // Fonction pour gérer la sélection de fichier
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,6 +94,7 @@ const UserInfo = () => {
       await uploadImage(file);
     }
   };
+  
 
   const captureImage = async () => {
     try {
@@ -99,13 +103,13 @@ const UserInfo = () => {
         allowEditing: true,
         resultType: CameraResultType.Uri,
       });
-
+  
       if (photo.webPath) {
         const response = await fetch(photo.webPath);
         const blob = await response.blob();
         await uploadImage(blob);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error capturing image:", error);
       toast({
         variant: "destructive",
@@ -114,6 +118,8 @@ const UserInfo = () => {
       });
     }
   };
+  
+  
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -127,6 +133,7 @@ const UserInfo = () => {
     });
     setImageUrl(null);
   };
+  
 
   const handleCapture = () => {
     setIsCameraOpen(true);
@@ -139,23 +146,25 @@ const UserInfo = () => {
         <Card className="bg-crypto-card border-none p-6 relative">
           <div className="flex items-center space-x-4">
             <div className="relative group">
-              <Avatar
-                className="h-20 w-20 cursor-pointer rounded-full border-4 border-crypto-primary transition-transform duration-300 group-hover:scale-105"
-                onClick={toggleModal}
-              >
-                {imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt="Profile"
-                    className="h-full w-full rounded-full object-cover"
-                    onError={handleImageError}
-                  />
-                ) : (
-                  <div className="bg-crypto-primary/20 h-full w-full rounded-full flex items-center justify-center">
-                    <User className="h-8 w-8 text-crypto-primary" />
-                  </div>
-                )}
-              </Avatar>
+            <Avatar
+              className="h-20 w-20 cursor-pointer rounded-full border-4 border-crypto-primary transition-transform duration-300 group-hover:scale-105"
+              onClick={toggleModal}
+            >
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="Profile"
+                  className="h-full w-full rounded-full object-cover"
+                  onError={handleImageError}
+                />
+              ) : (
+                <div className="bg-crypto-primary/20 h-full w-full rounded-full flex items-center justify-center">
+                  <User className="h-8 w-8 text-crypto-primary" />
+                </div>
+              )}
+            </Avatar>
+
+
               {isUploading && (
                 <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
                   <Loader2 className="h-6 w-6 animate-spin text-white" />
