@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Déclaration du SDK -->
+    <uses-sdk
+        android:minSdkVersion="21"
+        android:targetSdkVersion="40"
+        tools:overrideLibrary="com.capacitorjs.plugins.app" />
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -38,11 +44,8 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
     </application>
 
-    <!-- Permissions -->
-
-    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
