@@ -1,15 +1,14 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { signOut } from "firebase/auth";
-import { auth } from "../config/firebase"; // Assurez-vous que le chemin vers votre configuration Firebase est correct.
+import { auth } from "../config/firebase";
 import { useAuth } from "../auth/AuthProvider";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { User, Settings, Wallet, Bell, LogOut, X, Loader2 } from "lucide-react";
 import { Camera, CameraResultType } from "@capacitor/camera";
-import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
-import { v4 as uuidv4 } from 'uuid';
+import axios from "axios";
 
 const UserInfo = () => {
   const { user } = useAuth();
@@ -24,7 +23,18 @@ const UserInfo = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const IMAGEKIT_PUBLIC_KEY = "public_iGIERvQIqHyYfr1AUkbPC10ByM0=";
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/firebase-messaging-sw.js")
+        .then((registration) => {
+          console.log("Service Worker registered successfully:", registration);
+        })
+        .catch((error) => {
+          console.error("Service Worker registration failed:", error);
+        });
+    }
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -37,55 +47,33 @@ const UserInfo = () => {
     }
   };
 
-
-  const fetchSignature = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/generate-signature");
-      if (!response.ok) throw new Error("Erreur lors de la récupération de la signature");
-
-      const { signature, timestamp, expire } = await response.json();
-      return { signature, timestamp, expire };
-    } catch (error) {
-      console.error("Erreur de signature :", error);
-      throw error;
-    }
-  };
-
-
+  // Fonction pour télécharger une image via un fichier sélectionné
   const uploadImage = async (file: File | Blob) => {
     try {
-      const { signature, timestamp, expire } = await fetchSignature();
-  
+      console.log("Uploading file:", file);
+
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("fileName", file instanceof File ? file.name : "captured_image.jpg");
-      formData.append("publicKey", IMAGEKIT_PUBLIC_KEY);
-      formData.append("signature", signature);
-      formData.append("expire", expire);
-      formData.append("timestamp", timestamp);
-  
+      formData.append("fileName", file instanceof File ? file.name : "image.jpg");
+
       setIsUploading(true);
-  
-      const response = await fetch("http://localhost:3000/upload-proxy", {
-        method: "POST",
-        body: formData,
+
+      const response = await axios.post("http://localhost:3000/upload-image", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-  
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erreur inconnue");
-      }
-  
-      const data = await response.json();
-      console.log("Upload réussi :", data);
-      setImageUrl(data.url || null);
-  
+
+      const data = response.data;
+      console.log("Upload succeeded:", data);
+      setImageUrl(data.imageUrl); // Afficher l'URL de l'image téléchargée
+
       toast({
         title: "Upload réussi",
         description: "L'image a été uploadée avec succès.",
       });
     } catch (error) {
-      console.error("Erreur d'upload :", error);
+      console.error("Error uploading image:", error);
       toast({
         variant: "destructive",
         title: "Erreur d'upload",
@@ -95,12 +83,14 @@ const UserInfo = () => {
       setIsUploading(false);
     }
   };
-  
-  
-  
 
-  
-
+  // Fonction pour gérer la sélection de fichier
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      await uploadImage(file);
+    }
+  };
 
   const captureImage = async () => {
     try {
@@ -109,35 +99,20 @@ const UserInfo = () => {
         allowEditing: true,
         resultType: CameraResultType.Uri,
       });
-  
+
       if (photo.webPath) {
         const response = await fetch(photo.webPath);
         const blob = await response.blob();
         await uploadImage(blob);
       }
     } catch (error: any) {
-      if (error.message === "User cancelled photos app") {
-        console.log("L'utilisateur a annulé la capture.");
-      } else {
-        console.error("Erreur de capture:", error);
-        toast({
-          variant: "destructive",
-          title: "Erreur de caméra",
-          description: "Impossible d'accéder à la caméra.",
-        });
-      }
+      console.error("Error capturing image:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur de caméra",
+        description: "Impossible d'accéder à la caméra.",
+      });
     }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      const file = e.target.files[0];
-      await uploadImage(file);
-    }
-  };
-
-  const handleCapture = () => {
-    setIsCameraOpen(true);
   };
 
   const toggleModal = () => {
@@ -153,9 +128,9 @@ const UserInfo = () => {
     setImageUrl(null);
   };
 
-
-
-
+  const handleCapture = () => {
+    setIsCameraOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-crypto-dark text-white p-4 animate-fadeIn">

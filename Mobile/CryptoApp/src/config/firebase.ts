@@ -10,8 +10,7 @@ const firebaseConfig = {
   projectId: "cryptoo-c89b8",
   storageBucket: "cryptoo-c89b8.firebasestorage.app",
   messagingSenderId: "614649278019",
-  appId: "1:614649278019:web:2f54246f7844ff6d986ef6",
-  measurementId: "G-D0710X2STF",
+  appId: "1:614649278019:web:2f54246f7844ff6d986ef6"
 };
 
 // Initialize Firebase

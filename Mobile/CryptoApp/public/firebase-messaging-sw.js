@@ -1,27 +1,28 @@
-importScripts("https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js");
-importScripts("https://www.gstatic.com/firebasejs/9.6.10/firebase-messaging.js");
+importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
-const firebaseConfig = {
-  apiKey: "AIzaSyANBXGPcsc1C9ifYWbn2TcEmK2UTxZOunk",
-  authDomain: "cryptoo-c89b8.firebaseapp.com",
-  projectId: "cryptoo-c89b8",
-  storageBucket: "cryptoo-c89b8.firebasestorage.app",
-  messagingSenderId: "614649278019",
-  appId: "1:614649278019:web:2f54246f7844ff6d986ef6",
-  measurementId: "G-D0710X2STF",
-};
+// Initialize Firebase
+firebase.initializeApp({
+    apiKey: "AIzaSyANBXGPcsc1C9ifYWbn2TcEmK2UTxZOunk",
+    authDomain: "cryptoo-c89b8.firebaseapp.com",
+    projectId: "cryptoo-c89b8",
+    storageBucket: "cryptoo-c89b8.firebasestorage.app",
+    messagingSenderId: "614649278019",
+    appId: "1:614649278019:web:2f54246f7844ff6d986ef6"
+});
 
-firebase.initializeApp(firebaseConfig);
-
+// Retrieve an instance of Firebase Messaging
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage((payload) => {
-  console.log("Notification reçue en arrière-plan :", payload);
+// Handle background messages
+messaging.onBackgroundMessage(function(payload) {
+  console.log('Received background message ', payload);
+
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: payload.notification.icon,
+    icon: '/placeholder.svg'
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  return self.registration.showNotification(notificationTitle, notificationOptions);
 });
