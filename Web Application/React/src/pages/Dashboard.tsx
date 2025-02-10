@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import { useNavigate } from "react-router-dom";
 import Transactions from "@/components/Transactions";
 import { getPortefeuille } from "../services/CryptoService";
+import Options from "@/components/Options";
 
 
 const Dashboard = () => {
@@ -53,7 +54,9 @@ const Dashboard = () => {
           <div className="lg:col-span-3 md:col-span-12  col-span-12 pt-5">
             <Transactions solde={argent} idUtilisateur={user ? user.id : undefined}  refreshTrigger={refreshTrigger} />
           </div>
-
+          <div className="lg:col-span-9 md:col-span-12 col-span-12 space-y-12">
+            <Options/>
+          </div>
           {/* Section Crypto (7 colonnes sur écran moyen, 12 sur petit) */}
           <div className="lg:col-span-9 md:col-span-12 col-span-12 space-y-12">
             <h1 className="text-4xl font-bold text-center mb-12 pt-7">
