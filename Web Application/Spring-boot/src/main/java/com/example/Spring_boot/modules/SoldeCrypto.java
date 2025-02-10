@@ -22,11 +22,11 @@ public class SoldeCrypto {
     @Column(name = "type", length = 50)
     private String type; 
     
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "id_cryptomonnaies", nullable = false)
     private Cryptomonnaies cryptomonnaies;
     
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "id_portefeuille", nullable = false)
     private Portefeuille portefeuille;
 
