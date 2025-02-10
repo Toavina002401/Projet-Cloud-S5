@@ -3,7 +3,7 @@
 # Emplacements des Livrables Demandés
 
 1. **BackOffice**
-   - Tous les projets ou API développés avec Symfony sont disponibles dans ce dossier.
+   - Tous les projets ou API développés avec Symfony (Fournisseur d'identité) sont disponibles dans ce dossier.
 
 2. **Dossier MCD**
    - Contient le modèle conceptuel de données pour visualiser la conception de notre base de données.
@@ -13,7 +13,7 @@
 
 4. **Todo-liste**
    - Retrouvez notre liste de tâches à l'aide de ce lien :
-     [Accéder à la Todo-liste](https://docs.google.com/spreadsheets/d/1N9Cf7tioxJxChFK4XmtcgK6fhmd7zjx-Y6H9raRyyzc/edit?usp=sharing)
+     [Accéder à la Todo-liste](https://docs.google.com/spreadsheets/d/1ZjZKRh_lusxVhIsYagb2nNsrxwHGTKNl_pJYIwL1uKA/edit?gid=1879296117#gid=1879296117)
 
 5. **Projet GitHub**
    - Le projet est accessible sur notre dépôt GitHub via ce lien :
@@ -35,73 +35,49 @@ Ce guide explique comment configurer notre projet (Projet-Cloud-S5) dans un envi
 ---
 
 ## 1. Configuration de Docker
-Les fichier `docker-compose.yml` et `Dockerfile` sont configurés pour un projet Symfony avec PostgreSQL dans le repertoire BackOffice/docker/.
+Les fichier `docker-compose.yml` et `Dockerfile` sont configurés dans Symfony et dans le Spring-boot.
 
 ---
 
-## 2. Construction et démarrage des conteneurs
+## 2. Creation d'une network
+Exécutez cette commande pour creer une network pour l'interaction entre les conf docker du symfony et les conf docker du Spring boot
+
+```bash
+   docker network create it_network
+```
+
+## 3. Construction et démarrage des conteneurs(container_db et container_php)
 Exécutez les commandes suivantes pour construire et démarrer les conteneurs Docker (Execute cela dans le repertoire BackOffice/docker/):
 
 ```bash
-docker-compose down  # Arrêter les conteneurs existants
-docker-compose up --build -d  # Construire et démarrer les conteneurs en mode détaché
+docker-compose down -v 
+docker-compose up --build
 ```
 
 ---
+### Verification du serveur symfony
+Si cela marche sans erreur dans le logs alors verifier dans une navigateur que le serveur marche vraiment Tapez cette lien:
+[http://127.0.0.1:8080/](http://127.0.0.1:8080/) `Le serveur symfony ` est déployer pour le port 8080. alors veuillez eteindre tous les autres serveur possible de le bloquer.
 
-## 3. Interaction avec Doctrine
+#### Les documentations des apis de ce fournisseur d'identité sont dans cette lien [http://127.0.0.1:8080/doc](http://127.0.0.1:8080/)
 
-### Accéder au conteneur PHP
-Pour exécuter des commandes Symfony ou Doctrine, accédez au conteneur PHP :
-
-```bash
-docker exec -it container_php bash
-```
-
-### Configuration du base
-La variable `DATABASE_URL` est correctement définie dans notre fichier `.env` ou dans la section `environment` de notre fichier `docker-compose.yml` :
-
-```env
-DATABASE_URL="pgsql://postgres:Belouh@db:5432/ProjetCloudS5"
-```
-
-#### Créer la base de données
-Exécutez la commande suivante pour créer la base de données :
-
-```bash
-php bin/console doctrine:database:create
-```
-
-#### Créer le schéma de la base de données
-Générez et appliquez le schéma avec la commande :
-
-```bash
-php bin/console doctrine:schema:create
-```
-
-#### Exécuter les migrations
-
-Générez un fichier de migration avec :
-
-```bash
-php bin/console make:migration
-```
-
-Appliquez les migrations en utilisant :
-
-```bash
-php bin/console doctrine:migrations:migrate
-```
 
 ---
+## 4. Démarrage du container qui contient les env pour spring-boot(springboot_container)
+Exécutez les commandes suivantes pour construire et démarrer les conteneurs Docker (Execute cela dans le repertoire Web Application/Spring-boot/):
 
-## 4. Démarrage du projet dans le docker
+```bash
+docker-compose down -v 
+docker-compose up --build
+```
 
-### Verification des conteneur
-Assurer vous que les contenaire comme `container_db` et `container_php` marche bien sans erreur dans le docker. 
+### Verification du serveur spring-boot
+Si cela marche sans erreur dans le logs alors verifier dans une navigateur que le serveur marche vraiment Tapez cette lien:
+[http://127.0.0.1:8081/](http://127.0.0.1:8081/) `Le serveur spring-boot ` est déployer pour le port 8081. alors veuillez eteindre tous les autres serveur possible de le bloquer.
 
 
-### Direction vers une navigateur
-Pour demarrer maintenant le projet (Projet-Cloud-S5) tapez cette lien dans le navigateur :[http://127.0.0.1:8080](http://127.0.0.1:8080/)
+## Verification des conteneur
+Assurer vous que les contenaire comme `container_db` et `container_php` et ` springboot_container` marche bien sans erreur dans le docker. 
+
 
 

@@ -8,8 +8,8 @@ import loadingAnimation from "../../dist/assets/images/load.json";
 import lottie from "lottie-web";
 
 const LoginForm = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("john.doe@company.com");
+  const [password, setPassword] = useState("password123");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
