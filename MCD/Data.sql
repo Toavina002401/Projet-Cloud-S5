@@ -1,17 +1,1 @@
-INSERT INTO Utilisateur (pseudo, email, mdp, date_creation, actif) VALUES
-('John Doe', 'john.doe@company.com', 'password123', '2025-01-01 09:00:00', true),
-('Jane Smith', 'jane.smith@company.com', 'securePassword!234', '2025-01-02 10:15:00', true),
-('Mark Taylor', 'mark.taylor@company.com', 'P@ssw0rd567', '2025-01-03 14:30:00', true),
-('Lucas Brown', 'lucas.brown@company.com', 'Pa$$word890', '2025-01-04 11:45:00', true),
-('Emily Clark', 'emily.clark@company.com', '1234abcdEF', '2025-01-05 08:00:00', true),
-('Paul Johnson', 'paul.johnson@company.com', 'qwerty!@#123', '2025-01-06 16:20:00', true),
-('Kate White', 'kate.white@company.com', 'MySecurePass789', '2025-01-07 12:10:00', true),
-('David Williams', 'david.williams@company.com', 'd@v1dP@sswrd', '2025-01-08 13:25:00', true),
-('Trump Donal', 'david.williams@company.com', 'd@v1dP@sswrd', '2025-01-08 13:25:00', false),
-('Lisa Harris', 'lisa.harris@company.com', 'H@rr1s2025', '2025-01-09 15:40:00', true),
-('Robert Martin', 'robert.martin@company.com', 'M@rt1n567', '2025-01-10 17:50:00', true),
-('Susan Davis', 'susan.davis@company.com', 'S!1234Davis', '2025-01-11 09:05:00', true),
-('Michael Lewis', 'michael.lewis@company.com', 'L3w1sPass#2025', '2025-01-12 10:30:00', true),
-('Laura Thomas', 'laura.thomas@company.com', 'Th0m@5P@ss', '2025-01-13 11:55:00', true),
-('Chris Moore', 'chris.moore@company.com', 'Chr1$M0ore123', '2025-01-14 14:00:00', true),
-('Daniel King', 'daniel.king@company.com', 'King#321', '2025-01-15 16:10:00', true);
+

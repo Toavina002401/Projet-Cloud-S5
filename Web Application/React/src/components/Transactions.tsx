@@ -1,7 +1,7 @@
 import { useState,useEffect } from "react";
 import Card from "./common/Card";
 import Button from "./common/Button";
-import { histoTransaction,depot,retrait,getAlltransactionCryptoById } from "../services/CryptoService";
+import { histoTransaction,depot,retrait,getAlltransactionCryptoById,getPortefeuille } from "../services/CryptoService";
 
 interface TransactionsProps {
   solde: number; 
@@ -28,6 +28,7 @@ const Transactions: React.FC<TransactionsProps> = ({ solde,idUtilisateur,refresh
   useEffect(() => {
     const fetchTransactionHistory = async () => {
       try {
+        setTransactionHistory([]); // Réinitialiser les transactions avant de commencer
         const history = await histoTransaction(idUtilisateur);
         const formattedHistory = history.data.map((transaction: any) => ({
           type: transaction.type === "DEPOT" ? "Dépôt" : "Retrait",
@@ -36,33 +37,46 @@ const Transactions: React.FC<TransactionsProps> = ({ solde,idUtilisateur,refresh
         }));
   
         const cryptoHistoryResponse = await getAlltransactionCryptoById(idUtilisateur);
+        let allTransactions = [...formattedHistory]; // Commencer avec l'historique classique
+  
         if (cryptoHistoryResponse.status === "success") {
           const formattedCryptoHistory = cryptoHistoryResponse.data.map((transaction: any) => ({
-            type: transaction.cryptomonnaies.nom + " ($"+transaction.prixCrypto +") ",
+            type: transaction.cryptomonnaies.nom + " ($" + transaction.prixCrypto + ") ",
             amount: transaction.prixCrypto * transaction.quantiteCrypto,
             date: new Date(transaction.dernierMaj).toLocaleString(),
             crypto: `${transaction.cryptomonnaies.symbole} (${transaction.quantiteCrypto})`,
             aff: transaction.type,
           }));
-
-          setTransactionHistory((prevHistory) => [
-            ...formattedCryptoHistory.reverse(),
-            ...formattedHistory.reverse(),
-            ...prevHistory,
-          ]);
-        }else{
-          setTransactionHistory((prevHistory) => [
-            ...formattedHistory.reverse(), // Inverser l'ordre
-            ...prevHistory,
-          ]);
+  
+          // Fusionner les historiques classiques et cryptos
+          allTransactions = [...allTransactions, ...formattedCryptoHistory];
         }
+  
+        // Trier toutes les transactions par date, du plus récent au plus ancien
+        allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  
+        // Mettre à jour l'état avec les transactions triées
+        setTransactionHistory(allTransactions);
+  
       } catch (error) {
         console.error("Erreur lors de la récupération de l'historique des transactions:", error);
       }
     };
   
     fetchTransactionHistory();
+  
+    // Récupérer les informations du portefeuille
+    getPortefeuille(idUtilisateur)
+      .then((data) => {
+        if (data && data.data) {
+          setWalletBalance(data.data.soldeFonds);
+        }
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération du portefeuille", error);
+      });
   }, [idUtilisateur, refreshTrigger]);
+  
 
   const showNotification = (message: string, type: "success" | "error") => {
     setNotification({ message, type });

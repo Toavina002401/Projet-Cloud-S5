@@ -1,0 +1,16 @@
+services:
+  springboot:
+    build: .
+    container_name: springboot_container
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://container_db:5432/ProjetCloudS5  
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Belouh
+    networks:
+      - it_network
+
+networks:
+  it_network:
+    external: true

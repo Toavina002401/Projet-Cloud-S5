@@ -12,6 +12,8 @@ services:
       APP_ENV: prod
     depends_on:
       - db
+    networks:
+      - default
 
   db:
     image: postgres:15
@@ -25,6 +27,13 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./scripts/script.sql:/docker-entrypoint-initdb.d/script.sql
+    networks:
+      - default
 
 volumes:
   db_data:
+
+networks:
+  default:
+    external:
+      name: it_network

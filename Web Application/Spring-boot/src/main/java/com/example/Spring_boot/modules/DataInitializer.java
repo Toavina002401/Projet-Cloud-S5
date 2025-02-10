@@ -77,6 +77,8 @@ public class DataInitializer {
             /*Fin  Cryptomonnaies*/
 
             /*Save Portefeuille */
+                List<Double> montatntListe =  Arrays.asList(47495.34,8084.19,29410.00,22674.50,10193.00,18504.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00);    
+
                 List<Timestamp> dates = Arrays.asList(
                     Timestamp.valueOf("2025-01-01 09:00:00"),
                     Timestamp.valueOf("2025-01-02 10:15:00"),
@@ -100,7 +102,7 @@ public class DataInitializer {
                     if (utilisateur != null) {
                         Portefeuille portefeuille = new Portefeuille();
                         portefeuille.setDateCreation(dates.get(i));
-                        portefeuille.setSoldeFonds(0.0);
+                        portefeuille.setSoldeFonds(montatntListe.get(i));
                         portefeuille.setUtilisateur(utilisateur);
                         basePortefeuille.add(portefeuilleRepository.save(portefeuille));
                     }
@@ -157,25 +159,7 @@ public class DataInitializer {
                     new Object[]{"500.00", "2025-02-04 10:30:00", "1.01", "ACHETER", 4, 5},
                     new Object[]{"200.00", "2025-02-06 11:10:00", "0.99", "VENDRE", 4, 5},
                     new Object[]{"10.00", "2025-02-05 14:00:00", "198.50", "ACHETER", 5, 6},
-                    new Object[]{"5.00", "2025-02-07 15:30:00", "197.80", "VENDRE", 5, 6},
-                    new Object[]{"2.00", "2025-02-03 16:30:00", "585.50", "ACHETER", 6, 7},
-                    new Object[]{"1.00", "2025-02-05 17:00:00", "584.90", "VENDRE", 6, 7},
-                    new Object[]{"50.00", "2025-02-04 12:50:00", "19.25", "ACHETER", 7, 8},
-                    new Object[]{"25.00", "2025-02-06 14:10:00", "19.10", "VENDRE", 7, 8},
-                    new Object[]{"1.50", "2025-02-05 15:40:00", "3244.00", "ACHETER", 8, 9},
-                    new Object[]{"0.75", "2025-02-07 16:25:00", "3242.50", "VENDRE", 8, 9},
-                    new Object[]{"200.00", "2025-02-03 13:30:00", "9.90", "ACHETER", 9, 10},
-                    new Object[]{"100.00", "2025-02-05 14:20:00", "9.80", "VENDRE", 9, 10},
-                    new Object[]{"500.00", "2025-02-04 16:40:00", "3.05", "ACHETER", 10, 11},
-                    new Object[]{"250.00", "2025-02-06 11:00:00", "3.00", "VENDRE", 10, 11},
-                    new Object[]{"0.05", "2025-02-02 13:30:00", "98315.00", "ACHETER", 1, 12},
-                    new Object[]{"0.04", "2025-02-04 11:30:00", "98310.50", "VENDRE", 1, 12},
-                    new Object[]{"5.00", "2025-02-04 14:00:00", "2723.00", "ACHETER", 2, 13},
-                    new Object[]{"2.50", "2025-02-06 15:00:00", "2721.00", "VENDRE", 2, 13},
-                    new Object[]{"200.00", "2025-02-06 16:10:00", "2.50", "ACHETER", 3, 14},
-                    new Object[]{"100.00", "2025-02-08 09:45:00", "2.45", "VENDRE", 3, 14},
-                    new Object[]{"1000.00", "2025-02-07 10:30:00", "1.02", "ACHETER", 4, 15},
-                    new Object[]{"500.00", "2025-02-09 11:10:00", "0.98", "VENDRE", 4, 15}
+                    new Object[]{"5.00", "2025-02-07 15:30:00", "197.80", "VENDRE", 5, 6}
                 );
 
                 for (Object[] ct : cryptoTransactions) {
